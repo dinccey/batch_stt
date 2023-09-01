@@ -56,6 +56,18 @@
 			<artifactId>mysql-connector-j</artifactId>
 			<scope>runtime</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.modelmapper</groupId>
+			<artifactId>modelmapper</artifactId>
+			<version>3.1.1</version>
+		</dependency>
+		<dependency>
+			<groupId>org.vaslim</groupId>
+			<artifactId>spring-swagger-codegen-api-client</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/resources/openapi-client/spring-openapi-generator-api-client.jar</systemPath>
+		</dependency>
 	</dependencies>
 
 	<build>
