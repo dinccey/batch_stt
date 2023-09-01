@@ -3,6 +3,8 @@ package org.vaslim.batch_stt.model;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "item")
 public class Item {
@@ -18,6 +20,8 @@ public class Item {
     @Column(unique = true)
     private String filePathText;
 
+    @Column
+    private LocalDateTime processedTimestamp;
     public Long getId() {
         return id;
     }
@@ -40,5 +44,13 @@ public class Item {
 
     public void setFilePathText(String filePathText) {
         this.filePathText = filePathText;
+    }
+
+    public LocalDateTime getProcessedTimestamp() {
+        return processedTimestamp;
+    }
+
+    public void setProcessedTimestamp(LocalDateTime processedTimestamp) {
+        this.processedTimestamp = processedTimestamp;
     }
 }

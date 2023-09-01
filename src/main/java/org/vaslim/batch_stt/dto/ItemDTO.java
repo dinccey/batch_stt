@@ -1,5 +1,7 @@
 package org.vaslim.batch_stt.dto;
 
+import java.time.LocalDateTime;
+
 public class ItemDTO {
     private Long id;
 
@@ -7,6 +9,7 @@ public class ItemDTO {
 
     private String filePathText;
 
+    private LocalDateTime processedTimestamp;
     public Long getId() {
         return id;
     }
@@ -29,5 +32,13 @@ public class ItemDTO {
 
     public void setFilePathText(String filePathText) {
         this.filePathText = filePathText;
+    }
+
+    public LocalDateTime getProcessedTimestamp() {
+        return processedTimestamp;
+    }
+
+    public void setProcessedTimestamp(LocalDateTime processedTimestamp) {
+        this.processedTimestamp = processedTimestamp;
     }
 }
