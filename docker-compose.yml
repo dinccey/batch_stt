@@ -1,0 +1,30 @@
+version: '3'
+
+services:
+  app-be:
+    image: 'vaslim/batchstt'
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+    depends_on:
+      - db
+
+  db:
+    image: 'mysql:8.1'
+    container_name: batchstt-db
+    volumes:
+      - mysql:/var/lib/mysql
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=securepasswordlocal
+      - MYSQL_USER=batchstt
+      - MYSQL_PASSWORD=securepasswordlocal
+      - MYSQL_DATABASE=batchstt
+    restart: always
+
+volumes:
+  mysql:
