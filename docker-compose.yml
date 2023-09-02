@@ -1,16 +1,21 @@
 version: '3'
-
+#deploy with: docker compose up -d
 services:
   app-be:
     image: 'vaslim/batchstt'
     build:
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile #NOTE: prior to building with docker compose build, run script mvn-build.sh
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=dev
+      - SPRING_PROFILES_ACTIVE=local #active profile, one of: local, dev, prod
+      - WHISPER_ASR_URL=http://openai-whisper-asr-webservice:9000 #whisper asr url, currently the one in docker-compose
+      - FILESYSTEM_PATH=/var/home/vaslim/Videos/batchtool #path where all the videos are stored
+      - OUTPUT_FORMAT=srt #output format, one of: txt, vtt, srt, json, tsv
+      - JOB_CRON=0 0 14 * * ? #cron schedule for automatic run
     depends_on:
       - db
+      - openai-whisper-asr-webservice
 
   db:
     image: 'mysql:8.1'
@@ -25,6 +30,18 @@ services:
       - MYSQL_PASSWORD=securepasswordlocal
       - MYSQL_DATABASE=batchstt
     restart: always
+
+  openai-whisper-asr-webservice:
+      #image: onerahmet/openai-whisper-asr-webservice:latest-gpu
+      image: onerahmet/openai-whisper-asr-webservice:latest
+      environment:
+        #Available ASR_MODELs are tiny, base, small, medium, large, large-v1 and large-v2. Please note that large and large-v2 are the same model.
+        #For English-only applications, the .en models tend to perform better, especially for the tiny.en and base.en models.
+        #We observed that the difference becomes less significant for the small.en and medium.en models.
+        ASR_MODEL: large
+        ASR_ENGINE: openai_whisper
+      ports:
+        - "9000:9000"
 
 volumes:
   mysql:
