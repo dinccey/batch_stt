@@ -1,18 +1,18 @@
 version: '3'
-
+#deploy with: docker compose up -d
 services:
   app-be:
     image: 'vaslim/batchstt'
     build:
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile #NOTE: prior to building with docker compose build, run script mvn-build.sh
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=local
-      - WHISPER_ASR_URL=http://openai-whisper-asr-webservice:9000
-      - FILESYSTEM_PATH=/var/home/vaslim/Videos/batchtool
-      - OUTPUT_FORMAT=srt
-      - JOB_CRON=0 0 14 * * ?
+      - SPRING_PROFILES_ACTIVE=local #active profile, one of: local, dev, prod
+      - WHISPER_ASR_URL=http://openai-whisper-asr-webservice:9000 #whisper asr url, currently the one in docker-compose
+      - FILESYSTEM_PATH=/var/home/vaslim/Videos/batchtool #path where all the videos are stored
+      - OUTPUT_FORMAT=srt #output format, one of: txt, vtt, srt, json, tsv
+      - JOB_CRON=0 0 14 * * ? #cron schedule for automatic run
     depends_on:
       - db
       - openai-whisper-asr-webservice
