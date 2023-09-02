@@ -1,5 +1,10 @@
 package org.vaslim.batch_stt.service;
 
-public interface WhisperClientService {
+import org.springframework.stereotype.Service;
 
+@Service
+public interface WhisperClientService {
+    void processAllFiles();
+
+    void findUnprocessedFiles();
 }
