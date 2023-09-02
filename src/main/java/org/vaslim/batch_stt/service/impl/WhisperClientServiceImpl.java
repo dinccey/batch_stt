@@ -9,13 +9,18 @@ import org.vaslim.batch_stt.service.WhisperClientService;
 
 import java.io.*;
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class WhisperClientServiceImpl implements WhisperClientService {
 
     @Value("${FILESYSTEM_PATH}")
     private String filesystemPath;
+
+    @Value("${OUTPUT_FORMAT}")
+    private String outputFormat;
 
     private final FileService fileService;
 
@@ -33,11 +38,10 @@ public class WhisperClientServiceImpl implements WhisperClientService {
             String videoPath = item.getFilePathVideo();
             File videoFile = new File(videoPath);
             try {
+                String outputFileName = videoFile.getAbsolutePath().substring(0,videoFile.getAbsolutePath().lastIndexOf(".")) + "." + outputFormat;
                 File audioFile = fileService.extractAudio(videoFile);
-                File srtFile = fileService.processFile(audioFile);
-                ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                FileOutputStream fos = new FileOutputStream(srtFile);
-                byteArrayOutputStream.writeTo(fos);
+                fileService.processFile(audioFile, outputFileName);
+                saveAsProcessed(videoPath , outputFileName);
             } catch (IOException e) {
                 e.printStackTrace();
                 //throw new RuntimeException(e);
@@ -54,6 +58,15 @@ public class WhisperClientServiceImpl implements WhisperClientService {
                 System.out.println(directory+ "/"+ dir);
                 fileService.findUnprocessedFiles(Path.of(directory+ "/"+ dir));
             }
+        }
+    }
+
+    private void saveAsProcessed(String videoPath, String outputPath){
+        Optional<Item> item = itemRepository.findByFilePathVideoEquals(videoPath);
+        if(item.isPresent()){
+            item.get().setFilePathText(outputPath);
+            item.get().setProcessedTimestamp(LocalDateTime.now());
+            itemRepository.save(item.get());
         }
     }
 }

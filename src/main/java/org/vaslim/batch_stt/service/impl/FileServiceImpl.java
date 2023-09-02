@@ -1,29 +1,20 @@
 package org.vaslim.batch_stt.service.impl;
 
 import org.bytedeco.ffmpeg.global.avcodec;
-import org.bytedeco.ffmpeg.global.avutil;
-import org.bytedeco.javacpp.BytePointer;
-import org.bytedeco.javacpp.PointerPointer;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
-import org.bytedeco.javacv.Java2DFrameConverter;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.vaslim.batch_stt.dto.ItemDTO;
 import org.vaslim.batch_stt.model.Item;
 import org.vaslim.batch_stt.repository.ItemRepository;
 import org.vaslim.batch_stt.service.FileService;
 import org.vaslim.whisper_asr.client.api.EndpointsApi;
 
-import javax.sound.sampled.AudioFileFormat;
-import javax.sound.sampled.AudioInputStream;
-import javax.sound.sampled.AudioSystem;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.stream.Stream;
 
 @Service
@@ -34,19 +25,22 @@ public class FileServiceImpl implements FileService {
 
     private final ItemRepository itemRepository;
 
+    @Value("${OUTPUT_FORMAT}")
+    private String outputFormat;
+
     public FileServiceImpl(EndpointsApi endpointsApi, ItemRepository itemRepository) {
         this.endpointsApi = endpointsApi;
         this.itemRepository = itemRepository;
     }
 
     @Override
-    public File processFile(File file) throws IOException {
+    public File processFile(File file, String outputFilePathName) throws IOException {
 
-        byte[] fileContent = endpointsApi.asrAsrPost(file, TASK_TRANSCRIBE,"","", true, "srt");
-        String subtitleName = file.getAbsolutePath().substring(0, file.getAbsolutePath().lastIndexOf(".")) + ".srt";
-        FileOutputStream fos = new FileOutputStream(subtitleName);
+        byte[] fileContent = endpointsApi.asrAsrPost(file, TASK_TRANSCRIBE,"","", true, outputFormat);
+        FileOutputStream fos = new FileOutputStream(outputFilePathName);
         fos.write(fileContent);
         fos.close();
+        file.delete();
 
         return file;
     }
@@ -56,20 +50,19 @@ public class FileServiceImpl implements FileService {
         try (Stream<Path> paths = Files.walk(path)) {
             List<Path> fileList = paths.filter(Files::isRegularFile).toList();
             Set<String> filePaths = new HashSet<>();
-            Set<String> fileNames = new HashSet<>();
             for (Path filePath : fileList) {
-                String fileName = filePath.getFileName().toString();
-                String nameWithoutExtension = fileName.substring(0, fileName.lastIndexOf('.'));
-                if (fileNames.contains(nameWithoutExtension)) {
-                    System.out.println("Two files with the same name but different extension exist: " + fileName + " and " + fileNames.stream().filter(nameWithoutExtension::equals).findFirst().get());
-                } else {
-                    fileNames.add(nameWithoutExtension);
-                    filePaths.add(filePath.toString());
-                }
+                filePaths.add(filePath.toString());
             }
-            filePaths.stream().filter(filePath -> !filePath.endsWith("srt")).forEach(this::saveToProcess);
+            List<String> videoPaths = filePaths.stream().filter(filePath -> !filePath.endsWith(outputFormat)).toList();
+            videoPaths.forEach(this::saveToProcess);
+            List<String> textPaths = filePaths.stream().filter(filePath -> filePath.endsWith(outputFormat)).toList();
+            textPaths.forEach(textPath->{
+                String subtitleName = textPath.substring(0,textPath.lastIndexOf("."));
+                String videoPath = videoPaths.stream().filter(video->video.substring(0,video.lastIndexOf(".")).equals(subtitleName)).findFirst().get();
+                saveAsProcessed(videoPath, textPath);
+            });
 
-        } catch (IOException e) {
+        } catch (IOException | NoSuchElementException e) {
             e.printStackTrace();
         }
 
@@ -78,7 +71,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public File extractAudio(File videoFile) throws IOException {
 
-        File audioFile = new File(videoFile.getAbsolutePath().substring(0, videoFile.getAbsolutePath().lastIndexOf('.')) + ".mp3");
+        File audioFile = new File("tmp.mp3");
 
         try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(videoFile)) {
             grabber.setOption("-vn","");
@@ -106,23 +99,22 @@ public class FileServiceImpl implements FileService {
         return audioFile;
     }
 
-    private void saveToProcess(String path){
+    @Override
+    public void saveToProcess(String path){
         if(itemRepository.existsItemByFilePathVideoEquals(path)) return;
         Item item = new Item();
         item.setFilePathVideo(path);
         itemRepository.save(item);
     }
 
-    private static File convert(InputStream inputStream) throws IOException {
-        File tempFile = Files.createTempFile("temp", ".tmp").toFile();
-        try (FileOutputStream outputStream = new FileOutputStream(tempFile)) {
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
+    @Override
+    public void saveAsProcessed(String videoPath, String outputPath){
+        Optional<Item> item = itemRepository.findByFilePathVideoEquals(videoPath);
+        if(item.isPresent()){
+            item.get().setFilePathText(outputPath);
+            item.get().setProcessedTimestamp(LocalDateTime.now());
+            itemRepository.save(item.get());
         }
-        return tempFile;
     }
 
 }

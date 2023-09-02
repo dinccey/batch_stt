@@ -12,9 +12,13 @@ import java.nio.file.Path;
 public interface FileService {
 
     //receive video/audio file as input, send it to whisper ai and return the resulting text file as OutputStream
-    File processFile(File file) throws IOException;
+    File processFile(File file, String outputFilePathName) throws IOException;
 
     void findUnprocessedFiles(Path path);
 
     File extractAudio(File videoFile) throws IOException;
+
+    void saveAsProcessed(String videoPath, String outputPath);
+
+    void saveToProcess(String path);
 }

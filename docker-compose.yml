@@ -9,10 +9,13 @@ services:
       - "8080:8080"
     environment:
       - SPRING_PROFILES_ACTIVE=local
-      - WHISPER_ASR_URL=http://localhost:9000
-      - FILESYSTEM_PATH=
+      - WHISPER_ASR_URL=http://openai-whisper-asr-webservice:9000
+      - FILESYSTEM_PATH=/var/home/vaslim/Videos/batchtool
+      - OUTPUT_FORMAT=srt
+      - JOB_CRON=0 0 14 * * ?
     depends_on:
       - db
+      - openai-whisper-asr-webservice
 
   db:
     image: 'mysql:8.1'
@@ -27,6 +30,18 @@ services:
       - MYSQL_PASSWORD=securepasswordlocal
       - MYSQL_DATABASE=batchstt
     restart: always
+
+  openai-whisper-asr-webservice:
+      #image: onerahmet/openai-whisper-asr-webservice:latest-gpu
+      image: onerahmet/openai-whisper-asr-webservice:latest
+      environment:
+        #Available ASR_MODELs are tiny, base, small, medium, large, large-v1 and large-v2. Please note that large and large-v2 are the same model.
+        #For English-only applications, the .en models tend to perform better, especially for the tiny.en and base.en models.
+        #We observed that the difference becomes less significant for the small.en and medium.en models.
+        ASR_MODEL: large
+        ASR_ENGINE: openai_whisper
+      ports:
+        - "9000:9000"
 
 volumes:
   mysql:
