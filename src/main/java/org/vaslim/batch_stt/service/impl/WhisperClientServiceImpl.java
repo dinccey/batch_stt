@@ -44,7 +44,7 @@ public class WhisperClientServiceImpl implements WhisperClientService {
                 File audioFile = fileService.extractAudio(videoFile);
                 fileService.processFile(audioFile, outputFileNamePath);
                 if (new File(outputFileNamePath).exists()){
-                    saveAsProcessed(videoPath , outputFileNamePath);
+                    fileService.saveAsProcessed(videoPath , outputFileNamePath);
                 }
             } catch (IOException e) {
                 e.printStackTrace();
@@ -73,14 +73,4 @@ public class WhisperClientServiceImpl implements WhisperClientService {
         }
     }
 
-    private void saveAsProcessed(String videoPath, String outputPath){
-        Optional<Item> item = itemRepository.findByFilePathVideoEquals(videoPath);
-        if(item.isPresent()){
-            item.get().setFilePathText(outputPath);
-            item.get().setProcessedTimestamp(LocalDateTime.now());
-            item.get().setProcessingStatus(ProcessingStatus.FINISHED);
-            item.get().setVideoFileName(videoPath.substring(videoPath.lastIndexOf("/")));
-            itemRepository.save(item.get());
-        }
-    }
 }
