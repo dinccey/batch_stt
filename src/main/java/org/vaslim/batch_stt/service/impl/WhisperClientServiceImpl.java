@@ -17,7 +17,7 @@ import java.util.Optional;
 @Service
 public class WhisperClientServiceImpl implements WhisperClientService {
 
-    @Value("${FILESYSTEM_PATH}")
+    @Value("${filesystem.path}")
     private String filesystemPath;
 
     @Value("${OUTPUT_FORMAT}")
@@ -70,6 +70,7 @@ public class WhisperClientServiceImpl implements WhisperClientService {
                 System.out.println(directory+ "/"+ dir);
                 fileService.findUnprocessedFiles(Path.of(directory+ "/"+ dir));
             }
+            fileService.findUnprocessedFiles(Path.of(directory.getAbsolutePath()));
         }
     }
 
