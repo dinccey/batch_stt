@@ -102,6 +102,7 @@
 			<groupId>org.bytedeco</groupId>
 			<artifactId>javacv-platform</artifactId>
 			<version>1.5.9</version>
+			<optional>true</optional>
 		</dependency>
 	</dependencies>
 
