@@ -2,6 +2,7 @@ package org.vaslim.batch_stt.service.impl;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.vaslim.batch_stt.enums.ProcessingStatus;
 import org.vaslim.batch_stt.model.Item;
 import org.vaslim.batch_stt.repository.ItemRepository;
 import org.vaslim.batch_stt.service.FileService;
@@ -16,7 +17,7 @@ import java.util.Optional;
 @Service
 public class WhisperClientServiceImpl implements WhisperClientService {
 
-    @Value("${FILESYSTEM_PATH}")
+    @Value("${filesystem.path}")
     private String filesystemPath;
 
     @Value("${OUTPUT_FORMAT}")
@@ -37,16 +38,27 @@ public class WhisperClientServiceImpl implements WhisperClientService {
         unprocessedItems.forEach(item -> {
             String videoPath = item.getFilePathVideo();
             File videoFile = new File(videoPath);
+            updateItemStatus(videoFile, ProcessingStatus.IN_PROGRESS);
             try {
-                String outputFileName = videoFile.getAbsolutePath().substring(0,videoFile.getAbsolutePath().lastIndexOf(".")) + "." + outputFormat;
+                String outputFileNamePath = videoFile.getAbsolutePath().substring(0,videoFile.getAbsolutePath().lastIndexOf(".")) + "." + outputFormat;
                 File audioFile = fileService.extractAudio(videoFile);
-                fileService.processFile(audioFile, outputFileName);
-                saveAsProcessed(videoPath , outputFileName);
+                fileService.processFile(audioFile, outputFileNamePath);
+                if (new File(outputFileNamePath).exists()){
+                    fileService.saveAsProcessed(videoPath , outputFileNamePath);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
-                //throw new RuntimeException(e);
+                updateItemStatus(videoFile, ProcessingStatus.PENDING);
             }
         });
+    }
+
+    private void updateItemStatus(File videoFile, ProcessingStatus processingStatus) {
+        Optional<Item> item = itemRepository.findByFilePathVideoEquals(videoFile.getAbsolutePath());
+        if(item.isPresent()){
+            item.get().setProcessingStatus(processingStatus);
+            itemRepository.save(item.get());
+        }
     }
 
     @Override
@@ -58,15 +70,8 @@ public class WhisperClientServiceImpl implements WhisperClientService {
                 System.out.println(directory+ "/"+ dir);
                 fileService.findUnprocessedFiles(Path.of(directory+ "/"+ dir));
             }
+            fileService.findUnprocessedFiles(Path.of(directory.getAbsolutePath()));
         }
     }
 
-    private void saveAsProcessed(String videoPath, String outputPath){
-        Optional<Item> item = itemRepository.findByFilePathVideoEquals(videoPath);
-        if(item.isPresent()){
-            item.get().setFilePathText(outputPath);
-            item.get().setProcessedTimestamp(LocalDateTime.now());
-            itemRepository.save(item.get());
-        }
-    }
 }

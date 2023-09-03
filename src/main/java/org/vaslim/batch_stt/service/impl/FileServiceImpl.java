@@ -5,6 +5,7 @@ import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.vaslim.batch_stt.enums.ProcessingStatus;
 import org.vaslim.batch_stt.model.Item;
 import org.vaslim.batch_stt.repository.ItemRepository;
 import org.vaslim.batch_stt.service.FileService;
@@ -113,6 +114,8 @@ public class FileServiceImpl implements FileService {
         if(item.isPresent()){
             item.get().setFilePathText(outputPath);
             item.get().setProcessedTimestamp(LocalDateTime.now());
+            item.get().setProcessingStatus(ProcessingStatus.FINISHED);
+            item.get().setVideoFileName(videoPath.substring(videoPath.lastIndexOf("/")+1));
             itemRepository.save(item.get());
         }
     }

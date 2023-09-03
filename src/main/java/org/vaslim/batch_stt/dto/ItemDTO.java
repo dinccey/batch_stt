@@ -1,5 +1,8 @@
 package org.vaslim.batch_stt.dto;
 
+import jakarta.persistence.Column;
+import org.vaslim.batch_stt.enums.ProcessingStatus;
+
 import java.time.LocalDateTime;
 
 public class ItemDTO {
@@ -10,6 +13,27 @@ public class ItemDTO {
     private String filePathText;
 
     private LocalDateTime processedTimestamp;
+
+    private ProcessingStatus processingStatus = ProcessingStatus.PENDING;
+
+    private String videoFileName;
+
+    public ProcessingStatus getProcessingStatus() {
+        return processingStatus;
+    }
+
+    public void setProcessingStatus(ProcessingStatus processingStatus) {
+        this.processingStatus = processingStatus;
+    }
+
+    public String getVideoFileName() {
+        return videoFileName;
+    }
+
+    public void setVideoFileName(String videoFileName) {
+        this.videoFileName = videoFileName;
+    }
+
     public Long getId() {
         return id;
     }
