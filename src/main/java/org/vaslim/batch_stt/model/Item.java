@@ -2,6 +2,7 @@ package org.vaslim.batch_stt.model;
 
 
 import jakarta.persistence.*;
+import org.vaslim.batch_stt.enums.ProcessingStatus;
 
 import java.time.LocalDateTime;
 
@@ -19,6 +20,13 @@ public class Item {
 
     @Column(unique = true)
     private String filePathText;
+
+    @Column
+    @Enumerated(EnumType.STRING)
+    private ProcessingStatus processingStatus = ProcessingStatus.PENDING;
+
+    @Column
+    private String videoFileName;
 
     @Column
     private LocalDateTime processedTimestamp;
@@ -52,5 +60,21 @@ public class Item {
 
     public void setProcessedTimestamp(LocalDateTime processedTimestamp) {
         this.processedTimestamp = processedTimestamp;
+    }
+
+    public ProcessingStatus getProcessingStatus() {
+        return processingStatus;
+    }
+
+    public void setProcessingStatus(ProcessingStatus processingStatus) {
+        this.processingStatus = processingStatus;
+    }
+
+    public String getVideoFileName() {
+        return videoFileName;
+    }
+
+    public void setVideoFileName(String videoFileName) {
+        this.videoFileName = videoFileName;
     }
 }

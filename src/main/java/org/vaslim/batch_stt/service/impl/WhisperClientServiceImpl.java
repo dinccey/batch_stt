@@ -2,6 +2,7 @@ package org.vaslim.batch_stt.service.impl;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.vaslim.batch_stt.enums.ProcessingStatus;
 import org.vaslim.batch_stt.model.Item;
 import org.vaslim.batch_stt.repository.ItemRepository;
 import org.vaslim.batch_stt.service.FileService;
@@ -37,16 +38,27 @@ public class WhisperClientServiceImpl implements WhisperClientService {
         unprocessedItems.forEach(item -> {
             String videoPath = item.getFilePathVideo();
             File videoFile = new File(videoPath);
+            updateItemStatus(videoFile, ProcessingStatus.IN_PROGRESS);
             try {
-                String outputFileName = videoFile.getAbsolutePath().substring(0,videoFile.getAbsolutePath().lastIndexOf(".")) + "." + outputFormat;
+                String outputFileNamePath = videoFile.getAbsolutePath().substring(0,videoFile.getAbsolutePath().lastIndexOf(".")) + "." + outputFormat;
                 File audioFile = fileService.extractAudio(videoFile);
-                fileService.processFile(audioFile, outputFileName);
-                saveAsProcessed(videoPath , outputFileName);
+                fileService.processFile(audioFile, outputFileNamePath);
+                if (new File(outputFileNamePath).exists()){
+                    saveAsProcessed(videoPath , outputFileNamePath);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
-                //throw new RuntimeException(e);
+                updateItemStatus(videoFile, ProcessingStatus.PENDING);
             }
         });
+    }
+
+    private void updateItemStatus(File videoFile, ProcessingStatus processingStatus) {
+        Optional<Item> item = itemRepository.findByFilePathVideoEquals(videoFile.getAbsolutePath());
+        if(item.isPresent()){
+            item.get().setProcessingStatus(processingStatus);
+            itemRepository.save(item.get());
+        }
     }
 
     @Override
@@ -66,6 +78,8 @@ public class WhisperClientServiceImpl implements WhisperClientService {
         if(item.isPresent()){
             item.get().setFilePathText(outputPath);
             item.get().setProcessedTimestamp(LocalDateTime.now());
+            item.get().setProcessingStatus(ProcessingStatus.FINISHED);
+            item.get().setVideoFileName(videoPath.substring(videoPath.lastIndexOf("/")));
             itemRepository.save(item.get());
         }
     }
