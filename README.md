@@ -30,6 +30,8 @@ For a CUDA enabled system (using nvidia docker on LINUX ONLY), use this image in
   openai-whisper-asr-webservice:
       image: onerahmet/openai-whisper-asr-webservice:latest-gpu
 ```
+In case `latest` doesn't work, use `v1.1.1` or `v1.1.1-gpu` instead
+
 You can mount multiple directories by using different folder names:
 ```
 volumes:
