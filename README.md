@@ -1,18 +1,25 @@
 # BatchSTT
-is an open-source project that uses Whisper AI ASR Docker container to transcribe audio from videos automatically. It processes all videos in the given mounts and outputs the transcriptions in the desired format.
+Batch Speech to Text is a project that uses Whisper AI ASR Docker container to transcribe audio from videos automatically. It processes all videos in the given mounts and outputs the transcriptions in the desired format.
 
 ## Prerequisites
 Before running BatchSTT, you need to have the following installed:
 - Docker
-- Docker Compose
+- Docker compose
+- Maven and JDK 17 in system PATH
 ## Getting Started
 To get started, clone this repository to your local machine:
 
 `git clone https://github.com/dinccey/batch_stt.git`
 
-Then, navigate to the project directory and run the following command:
+Then, navigate to the project directory and run the following commands:
 
-docker-compose up -d
+`./mvn-build.sh`
+
+This will build the project using maven. Then:
+
+`docker-compose build`
+
+`docker-compose up -d`
 
 This will start the BatchSTT application and Whisper AI ASR Docker container.
 Environment VariablesThe following environment variables can be set in the docker-compose.yml file:
