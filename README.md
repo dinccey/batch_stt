@@ -44,7 +44,3 @@ volumes:
   - /path/to/local/directory:/mnt/videos/folder1:rw
   - /path/to/local/directory/videos:/mnt/videos/folder2:rw
 ```
-
-You can mount multiple directories by using different folder names.
-Built With- Spring Boot - The web framework used
-- Whisper AI ASR - The speech recognition model used
