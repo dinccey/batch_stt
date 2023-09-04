@@ -22,7 +22,10 @@ This will build the project using maven. Then:
 `docker-compose up -d`
 
 This will start the BatchSTT application and Whisper AI ASR Docker container.
-Environment VariablesThe following environment variables can be set in the docker-compose.yml file:
+
+## Environment Variables
+
+The following environment variables can be set in the docker-compose.yml file:
 - ```SPRING_PROFILES_ACTIVE```: The active profile for Spring Boot. Possible values are ```local```, ```dev```, or ```prod```.
 - ```WHISPER_ASR_URL```: The URL for Whisper AI ASR Docker container.
 - ```OUTPUT_FORMAT```: The output format for transcriptions. Possible values are ```txt```, ```vtt```, ```srt```, ```json```, or ```tsv```.
@@ -44,3 +47,19 @@ volumes:
   - /path/to/local/directory:/mnt/videos/folder1:rw
   - /path/to/local/directory/videos:/mnt/videos/folder2:rw
 ```
+To start the job manually there is an admin endpoint available. First, login with (currently) hardcoded username and password using the following JSON body:
+
+```
+{
+  "username": "admin",
+  "password": "mysecurepassword"
+}
+```
+on `/api/v1/auth/login`
+
+Then, on call GET on `/api/v1/admin/run`. The response will be blocked until all media is processed so it's a bad idea to use it other than for test runs.
+The functionality of the endpoints is likely to be extended.
+
+To import endpoints, use OpenAPI on `/v3/api-docs`
+
+This software is provided as-is. There may be bugs and so on.
