@@ -5,6 +5,7 @@ import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.vaslim.batch_stt.constants.Constants;
 import org.vaslim.batch_stt.enums.ProcessingStatus;
 import org.vaslim.batch_stt.model.Item;
 import org.vaslim.batch_stt.repository.ItemRepository;
@@ -102,7 +103,8 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public void saveToProcess(String path){
-        if(itemRepository.existsItemByFilePathVideoEquals(path)) return;
+        if(itemRepository.existsItemByFilePathVideoLike(path)
+                || Constants.Files.transcribeExtensions.stream().anyMatch(path::contains)) return;
         Item item = new Item();
         item.setFilePathVideo(path);
         itemRepository.save(item);
@@ -112,11 +114,15 @@ public class FileServiceImpl implements FileService {
     public void saveAsProcessed(String videoPath, String outputPath){
         Optional<Item> item = itemRepository.findByFilePathVideoEquals(videoPath);
         if(item.isPresent()){
-            item.get().setFilePathText(outputPath);
-            item.get().setProcessedTimestamp(LocalDateTime.now());
-            item.get().setProcessingStatus(ProcessingStatus.FINISHED);
-            item.get().setVideoFileName(videoPath.substring(videoPath.lastIndexOf("/")+1));
-            itemRepository.save(item.get());
+            try{
+                item.get().setFilePathText(outputPath);
+                item.get().setProcessedTimestamp(LocalDateTime.now());
+                item.get().setProcessingStatus(ProcessingStatus.FINISHED);
+                item.get().setVideoFileName(videoPath.substring(videoPath.lastIndexOf("/")+1));
+                itemRepository.save(item.get());
+            } catch (Exception e){
+
+            }
         }
     }
 

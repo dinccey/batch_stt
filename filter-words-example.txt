@@ -1,0 +1,3 @@
+AwfulWord:ReplacementWord
+WorseWord:BetterReplacementWord
+HorribleWord:@@@

@@ -14,7 +14,9 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     List<Item> findAllByFilePathTextIsNull();
 
-    boolean existsItemByFilePathVideoEquals(String filePathVideo);
+    boolean existsItemByFilePathVideoLike(String filePathVideo);
 
     Optional<Item> findByFilePathVideoEquals(String filePathVideo);
+
+    List<Item> findByTextFilterHashNotLikeOrTextFilterHashIsNull(String filterMapHash);
 }

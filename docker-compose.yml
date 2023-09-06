@@ -13,9 +13,13 @@ services:
      # - FILESYSTEM_PATH=/var/home/vaslim/Videos/batchtool #path where all the videos are stored
       - OUTPUT_FORMAT=srt #output format, one of: txt, vtt, srt, json, tsv
       - JOB_CRON=0 0 14 * * ? #cron schedule for automatic run
+      #path of the filer file for local use
+     # - FILTER_MAP_PATH=/some/path
     volumes:   #mount video path to /mnt/videos/FOLDER_NAME, possible multiple different mounts, just use different FOLDER_NAME
       - /var/home/vaslim/Container/batchtool/mejia:/mnt/videos/mejia:rw
       - /var/home/vaslim/Container/batchtool/mejio:/mnt/videos/mejio:rw
+      #mount the filter file
+      - /var/home/vaslim/Container/filter.txt:/etc/filter.txt:r
     depends_on:
       - db
       - openai-whisper-asr-webservice

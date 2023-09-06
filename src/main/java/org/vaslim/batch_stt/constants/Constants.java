@@ -1,5 +1,7 @@
 package org.vaslim.batch_stt.constants;
 
+import java.util.List;
+
 public interface Constants
 {
     interface Endpoint{
@@ -11,5 +13,9 @@ public interface Constants
         long EXPIRATION_TIME = 900_000; // 15 mins
         String TOKEN_PREFIX = "Bearer ";
         String HEADER_STRING = "Authorization";
+    }
+
+    interface Files {
+        List<String> transcribeExtensions = List.of(".srt",".vtt",".txt",".json",".tsv");
     }
 }

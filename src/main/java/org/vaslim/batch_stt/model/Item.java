@@ -30,6 +30,10 @@ public class Item {
 
     @Column
     private LocalDateTime processedTimestamp;
+
+    @Column(length = 64)
+    private String textFilterHash;
+
     public Long getId() {
         return id;
     }
@@ -76,5 +80,13 @@ public class Item {
 
     public void setVideoFileName(String videoFileName) {
         this.videoFileName = videoFileName;
+    }
+
+    public String getTextFilterHash() {
+        return textFilterHash;
+    }
+
+    public void setTextFilterHash(String textFilterHash) {
+        this.textFilterHash = textFilterHash;
     }
 }
