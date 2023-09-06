@@ -29,7 +29,7 @@ public class TextFilteringServiceImpl implements TextFilteringService {
     @Override
     public void processTextFiles(Map<String, String> filterMap) {
         String hash = generateFilterMapHash(filterMap);
-        List<Item> itemsToProcess = itemRepository.findByTextFilterHashNotLike(hash);
+        List<Item> itemsToProcess = itemRepository.findByTextFilterHashNotLikeOrTextFilterHashIsNull(hash);
 
         itemsToProcess.forEach(item-> {
             try {
