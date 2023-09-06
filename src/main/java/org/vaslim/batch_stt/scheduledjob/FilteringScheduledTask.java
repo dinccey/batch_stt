@@ -15,7 +15,7 @@ import java.util.Optional;
 public class FilteringScheduledTask {
     private TextFilteringService textFilteringService;
 
-    @Value("${FILTER_MAP_PATH:#{null}}")
+    @Value("${filterfile.path:#{null}}")
     private Optional<String> filterMapFilePath;
 
     @Scheduled(cron = "${JOB_CRON}")
