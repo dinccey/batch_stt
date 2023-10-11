@@ -11,17 +11,13 @@ To get started, clone this repository to your local machine:
 
 `git clone https://github.com/dinccey/batch_stt.git`
 
-Then, navigate to the project directory and run the following commands:
-
-`./mvn-build.sh`
-
-This will build the project using maven. Then:
+Then to build and run (don't forget to customize environment variables in docker-compose.yml):
 
 `docker-compose build`
 
 `docker-compose up -d`
 
-This will start the BatchSTT application and Whisper AI ASR Docker container.
+This will start the BatchSTT application and Whisper AI ASR Docker container. You can run Whisper container anywhere but only one instance at a time is supported at the moment.
 
 ## Environment Variables
 
