@@ -4,27 +4,35 @@ services:
   app-be:
     image: 'vaslim/batchstt'
     build:
-      dockerfile: Dockerfile #NOTE: prior to building with docker compose build, run script mvn-build.sh
+      dockerfile: Dockerfile
     ports:
       - "8080:8080"
     environment:
-      - SPRING_PROFILES_ACTIVE=dev #active profile, one of: local, dev, prod
-      - WHISPER_ASR_URL=http://openai-whisper-asr-webservice:9000 #whisper asr url, currently the one in docker-compose
+      #active profile, one of: local, dev, prod
+      - SPRING_PROFILES_ACTIVE=dev
+      #whisper asr url, currently the one in docker-compose
+      - WHISPER_ASR_URL=http://openai-whisper-asr-webservice:9000
      # - FILESYSTEM_PATH=/var/home/vaslim/Videos/batchtool #path where all the videos are stored
-      - OUTPUT_FORMAT=srt #output format, one of: txt, vtt, srt, json, tsv
-      - JOB_CRON=0 0 14 * * ? #cron schedule for automatic run
+      #output format, one of: txt, vtt, srt, json, tsv
+      - OUTPUT_FORMAT=srt
+      #cron schedule for automatic run
+      - JOB_CRON=0 0 14 * * ?
       #path of the filer file for local use
      # - FILTER_MAP_PATH=/some/path
-    volumes:   #mount video path to /mnt/videos/FOLDER_NAME, possible multiple different mounts, just use different FOLDER_NAME
-      - /var/home/vaslim/Container/batchtool/mejia:/mnt/videos/mejia:rw
-      - /var/home/vaslim/Container/batchtool/mejio:/mnt/videos/mejio:rw
+      - DATASOURCE_URL=jdbc:mysql://batchstt-db:3306/batchstt
+      - DATASOURCE_USERNAME=batchstt
+      - DATASOURCE_PASSWORD=securepasswordlocal
+    volumes:
+      #mount video path to /mnt/videos/FOLDER_NAME, possible multiple different mounts, just use different FOLDER_NAME
+      - /var/home/vaslim/Container/batchtool/folder1:/mnt/videos/folder1:rw
+      - /var/home/vaslim/Container/batchtool/folder2:/mnt/videos/folder2:rw
       #mount the filter file
       - /var/home/vaslim/Container/filter.txt:/etc/filter.txt:r
     depends_on:
-      - db
+      - batchstt-db
       - openai-whisper-asr-webservice
 
-  db:
+  batchstt-db:
     image: 'mysql:8.1'
     container_name: batchstt-db
     volumes:

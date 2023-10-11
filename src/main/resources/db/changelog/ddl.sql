@@ -19,3 +19,5 @@ create table batchstt.item_seq
     next_val bigint null
 );
 
+INSERT INTO batchstt.item_seq (next_val) values (1);
+
