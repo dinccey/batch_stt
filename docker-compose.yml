@@ -15,6 +15,9 @@ services:
       - JOB_CRON=0 0 14 * * ? #cron schedule for automatic run
       #path of the filer file for local use
      # - FILTER_MAP_PATH=/some/path
+      - DATASOURCE_URL=jdbc:mysql://db:3306/batchstt
+      - DATASOURCE_USERNAME=batchstt
+      - DATASOURCE_PASSWORD=securepasswordlocal
     volumes:   #mount video path to /mnt/videos/FOLDER_NAME, possible multiple different mounts, just use different FOLDER_NAME
       - /var/home/vaslim/Container/batchtool/mejia:/mnt/videos/mejia:rw
       - /var/home/vaslim/Container/batchtool/mejio:/mnt/videos/mejio:rw
