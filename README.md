@@ -22,6 +22,7 @@ This will start the BatchSTT application and Whisper AI ASR Docker container. Yo
 ## Environment Variables
 
 The following environment variables can be set in the docker-compose.yml file:
+- ```MP3_SAVE```: true or false, (default false) save mp3 of video in the same folder.
 - ```SPRING_PROFILES_ACTIVE```: The active profile for Spring Boot. Possible values are ```local```, ```dev```, or ```prod```.
 - ```WHISPER_ASR_URL```: The URL for Whisper AI ASR Docker container.
 - ```OUTPUT_FORMAT```: The output format for transcriptions. Possible values are ```txt```, ```vtt```, ```srt```, ```json```, or ```tsv```.
