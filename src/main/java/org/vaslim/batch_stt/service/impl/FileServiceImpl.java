@@ -11,6 +11,7 @@ import org.vaslim.batch_stt.model.Item;
 import org.vaslim.batch_stt.repository.ItemRepository;
 import org.vaslim.batch_stt.service.FileService;
 import org.vaslim.whisper_asr.client.api.EndpointsApi;
+import org.vaslim.whisper_asr.invoker.ApiClient;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -23,26 +24,26 @@ import java.util.stream.Stream;
 public class FileServiceImpl implements FileService {
 
     private static final String TASK_TRANSCRIBE = "transcribe";
-    private final EndpointsApi endpointsApi;
 
     private final ItemRepository itemRepository;
 
     @Value("${OUTPUT_FORMAT}")
     private String outputFormat;
 
-    public FileServiceImpl(EndpointsApi endpointsApi, ItemRepository itemRepository) {
-        this.endpointsApi = endpointsApi;
+    @Value("${mp3.save}")
+    private boolean saveAudio;
+
+    public FileServiceImpl(ItemRepository itemRepository) {
         this.itemRepository = itemRepository;
     }
 
     @Override
-    public File processFile(File file, String outputFilePathName) throws IOException {
+    public File processFile(File file, String outputFilePathName, EndpointsApi endpointsApi) throws IOException {
 
         byte[] fileContent = endpointsApi.asrAsrPost(file, TASK_TRANSCRIBE,"","", true, outputFormat);
         FileOutputStream fos = new FileOutputStream(outputFilePathName);
         fos.write(fileContent);
         fos.close();
-        file.delete();
 
         return file;
     }
@@ -59,9 +60,11 @@ public class FileServiceImpl implements FileService {
             videoPaths.forEach(this::saveToProcess);
             List<String> textPaths = filePaths.stream().filter(filePath -> filePath.endsWith(outputFormat)).toList();
             textPaths.forEach(textPath->{
-                String subtitleName = textPath.substring(0,textPath.lastIndexOf("."));
-                String videoPath = videoPaths.stream().filter(video->video.substring(0,video.lastIndexOf(".")).equals(subtitleName)).findFirst().get();
-                saveAsProcessed(videoPath, textPath);
+                if(Constants.Files.transcribeExtensions.stream().anyMatch(path.getFileName().toString()::contains)){
+                    String subtitleName = textPath.substring(0,textPath.lastIndexOf("."));
+                    String videoPath = videoPaths.stream().filter(video->video.substring(0,video.lastIndexOf(".")).equals(subtitleName)).findFirst().get();
+                    saveAsProcessed(videoPath, textPath);
+                }
             });
 
         } catch (IOException | NoSuchElementException e) {
@@ -72,9 +75,14 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public File extractAudio(File videoFile) throws IOException {
-
-        File audioFile = new File("tmp.mp3");
-
+        String audioFileName = "tmp.mp3";
+        if(saveAudio){
+            audioFileName = videoFile.getAbsolutePath().substring(0, videoFile.getAbsolutePath().lastIndexOf(".")) + ".mp3";
+        }
+        File audioFile = new File(audioFileName);
+        if(audioFile.exists()){
+            return audioFile;
+        }
         try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(videoFile)) {
             grabber.setOption("-vn","");
             grabber.start();
