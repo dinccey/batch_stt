@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.WebUtils;
 import org.vaslim.batch_stt.dto.InferenceInstanceDTO;
+import org.vaslim.batch_stt.pool.ConnectionPool;
 import org.vaslim.batch_stt.service.InferenceInstanceService;
 import org.vaslim.batch_stt.util.JwtUtils;
 
@@ -18,16 +19,19 @@ import java.util.Set;
 @RequestMapping("api/v1/instances")
 public class InferenceInstanceController {
 
-    @Value("${batchstt_jwt}")
+    @Value("${batchstt.jwtCookieName}")
     private String cookieName;
 
     private final JwtUtils jwtUtils;
 
     private final InferenceInstanceService inferenceInstanceService;
 
-    public InferenceInstanceController(JwtUtils jwtUtils, InferenceInstanceService inferenceInstanceService) {
+    private final ConnectionPool connectionPool;
+
+    public InferenceInstanceController(JwtUtils jwtUtils, InferenceInstanceService inferenceInstanceService, ConnectionPool connectionPool) {
         this.jwtUtils = jwtUtils;
         this.inferenceInstanceService = inferenceInstanceService;
+        this.connectionPool = connectionPool;
     }
 
     @PostMapping("/add")
@@ -36,7 +40,10 @@ public class InferenceInstanceController {
         assert cookie != null;
         String username = jwtUtils.getUserNameFromJwtToken(cookie.getValue());
 
-        return ResponseEntity.ok(inferenceInstanceService.addInferenceInstance(inferenceInstanceDTO,username));
+        InferenceInstanceDTO toReturn = inferenceInstanceService.addInferenceInstance(inferenceInstanceDTO,username);
+        connectionPool.refreshUrlsFromDatabase();
+
+        return ResponseEntity.ok(toReturn);
     }
 
     @PostMapping("/remove")
@@ -45,8 +52,10 @@ public class InferenceInstanceController {
         assert cookie != null;
         String username = jwtUtils.getUserNameFromJwtToken(cookie.getValue());
 
+        InferenceInstanceDTO toReturn = inferenceInstanceService.removeInferenceInstance(inferenceInstanceDTO,username);
+        connectionPool.refreshUrlsFromDatabase();
 
-        return ResponseEntity.ok(inferenceInstanceService.removeInferenceInstance(inferenceInstanceDTO,username));
+        return ResponseEntity.ok(toReturn);
     }
 
     @PostMapping("/disable")
@@ -55,7 +64,10 @@ public class InferenceInstanceController {
         assert cookie != null;
         String username = jwtUtils.getUserNameFromJwtToken(cookie.getValue());
 
-        return ResponseEntity.ok(inferenceInstanceService.disableInferenceInstance(inferenceInstanceDTO,username));
+        InferenceInstanceDTO toReturn = inferenceInstanceService.disableInferenceInstance(inferenceInstanceDTO,username);
+        connectionPool.refreshUrlsFromDatabase();
+
+        return ResponseEntity.ok(toReturn);
     }
 
     @PostMapping("/enable")
@@ -64,7 +76,10 @@ public class InferenceInstanceController {
         assert cookie != null;
         String username = jwtUtils.getUserNameFromJwtToken(cookie.getValue());
 
-        return ResponseEntity.ok(inferenceInstanceService.enableInferenceInstance(inferenceInstanceDTO,username));
+        InferenceInstanceDTO toReturn = inferenceInstanceService.enableInferenceInstance(inferenceInstanceDTO,username);
+        connectionPool.refreshUrlsFromDatabase();
+
+        return ResponseEntity.ok(toReturn);
     }
 
     @GetMapping("/all")

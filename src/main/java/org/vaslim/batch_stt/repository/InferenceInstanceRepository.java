@@ -13,4 +13,6 @@ public interface InferenceInstanceRepository extends JpaRepository<InferenceInst
     Optional<InferenceInstance> findByInstanceUrl(String instanceUrl);
 
     Set<InferenceInstance> findAllByAppUser(AppUser appUser);
+
+    Set<InferenceInstance> findAllByAvailableIsTrue();
 }

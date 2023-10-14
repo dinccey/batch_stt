@@ -1,10 +1,13 @@
-create table app_user
+create table batchstt.app_user
 (
     id       bigint       not null
         primary key,
     password varchar(255) null,
-    username varchar(255) null
+    username varchar(255) null,
+    admin    bit          null
 );
+
+
 
 create table app_user_seq
 (

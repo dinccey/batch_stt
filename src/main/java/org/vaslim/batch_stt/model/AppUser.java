@@ -20,7 +20,10 @@ public class AppUser {
     @Column
     private String password;
 
-    @OneToMany(mappedBy="appUser")
+    @Column(updatable = false)
+    private boolean admin = false;
+
+    @OneToMany(mappedBy="appUser", cascade = CascadeType.ALL)
     private Set<InferenceInstance> inferenceInstances;
 
     public Long getId() {
@@ -53,5 +56,13 @@ public class AppUser {
 
     public void setInferenceInstances(Set<InferenceInstance> inferenceInstances) {
         this.inferenceInstances = inferenceInstances;
+    }
+
+    public boolean isAdmin() {
+        return admin;
+    }
+
+    public void setAdmin(boolean admin) {
+        this.admin = admin;
     }
 }

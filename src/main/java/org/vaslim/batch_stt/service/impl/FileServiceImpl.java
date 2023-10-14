@@ -11,9 +11,10 @@ import org.vaslim.batch_stt.model.Item;
 import org.vaslim.batch_stt.repository.ItemRepository;
 import org.vaslim.batch_stt.service.FileService;
 import org.vaslim.whisper_asr.client.api.EndpointsApi;
-import org.vaslim.whisper_asr.invoker.ApiClient;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -112,7 +113,8 @@ public class FileServiceImpl implements FileService {
     @Override
     public void saveToProcess(String path){
         if(itemRepository.existsItemByFilePathVideoLike(path)
-                || Constants.Files.transcribeExtensions.stream().anyMatch(path::contains)) return;
+                || Constants.Files.transcribeExtensions.stream().anyMatch(path::contains)
+                || Constants.Files.ignoreExtensions.stream().anyMatch(path::contains)) return;
         Item item = new Item();
         item.setFilePathVideo(path);
         itemRepository.save(item);

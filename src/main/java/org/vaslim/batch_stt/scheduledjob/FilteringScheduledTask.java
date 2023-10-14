@@ -21,7 +21,7 @@ public class FilteringScheduledTask {
         this.textFilteringService = textFilteringService;
     }
 
-    @Scheduled(cron = "${JOB_CRON}")
+    @Scheduled(cron = "${job.cron}")
     public void run() {
         if(filterMapFilePath.isPresent()){
             Map<String,String> filterMap = textFilteringService.loadFilterMap(filterMapFilePath.get());

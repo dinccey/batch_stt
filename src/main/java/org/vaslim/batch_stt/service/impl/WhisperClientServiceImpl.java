@@ -70,6 +70,7 @@ public class WhisperClientServiceImpl implements WhisperClientService {
                 } catch (Exception e) {
                     e.printStackTrace();
                     updateItemStatus(videoFile, ProcessingStatus.PENDING);
+                    connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
                 }
             }).start();
 

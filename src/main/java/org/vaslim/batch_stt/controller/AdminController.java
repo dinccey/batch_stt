@@ -23,8 +23,11 @@ public class AdminController {
     private final JwtUtils jwtUtils;
     private final FilteringScheduledTask filteringScheduledTask;
 
-    @Value("${batchstt_jwt}")
+    @Value("${batchstt.jwtCookieName}")
     private String cookieName;
+
+    @Value("${spring.security.user.name}")
+    private String adminUsername;
 
     public AdminController(TranscribingScheduledTask transcribingScheduledTask, WhisperClientService whisperClientService, JwtUtils jwtUtils, FilteringScheduledTask filteringScheduledTask) {
         this.transcribingScheduledTask = transcribingScheduledTask;
@@ -37,7 +40,7 @@ public class AdminController {
     public ResponseEntity<?> run(final HttpServletRequest httpServletRequest){
         Cookie cookie = WebUtils.getCookie(httpServletRequest, cookieName);
         String username = jwtUtils.getUserNameFromJwtToken(cookie.getValue());
-        if(username.equals("admin")){
+        if(username.equals(adminUsername)){
             whisperClientService.findUnprocessedFiles();
             whisperClientService.processAllFiles();
             filteringScheduledTask.run();

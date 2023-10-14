@@ -14,7 +14,7 @@ public class TranscribingScheduledTask {
         this.whisperClientService = whisperClientService;
     }
 
-    @Scheduled(cron = "${JOB_CRON}")
+    @Scheduled(cron = "${job.cron}")
     public void run() {
         whisperClientService.findUnprocessedFiles();
         whisperClientService.processAllFiles();
