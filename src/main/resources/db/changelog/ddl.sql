@@ -1,4 +1,33 @@
-create table batchstt.item
+create table app_user
+(
+    id       bigint       not null
+        primary key,
+    password varchar(255) null,
+    username varchar(255) null
+);
+
+create table app_user_seq
+(
+    next_val bigint null
+);
+
+create table inference_instance
+(
+    available    bit          null,
+    app_user     bigint       not null,
+    id           bigint       not null
+        primary key,
+    instance_url varchar(255) not null,
+    constraint FKq7g6n0onkc20wkevyjq42s1or
+        foreign key (app_user) references app_user (id)
+);
+
+create table inference_instance_seq
+(
+    next_val bigint null
+);
+
+create table item
 (
     id                  bigint                                      not null
         primary key,
@@ -14,10 +43,15 @@ create table batchstt.item
         unique (file_path_text)
 );
 
-create table batchstt.item_seq
+create table item_seq
 (
     next_val bigint null
 );
 
+
+
 INSERT INTO batchstt.item_seq (next_val) values (1);
 
+INSERT INTO batchstt.inference_instance_seq (next_val) values (1);
+
+INSERT INTO batchstt.app_user_seq (next_val) values (1);
