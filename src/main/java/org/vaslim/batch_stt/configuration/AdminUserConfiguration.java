@@ -34,6 +34,7 @@ public class AdminUserConfiguration {
             appUserRepository.removeAppUserByAdminIsTrue();
             AppUser appUser = new AppUser();
             appUser.setAdmin(true);
+            appUser.setId(1L);
             appUser.setPassword(passwordEncoder.encode(adminPlaintextPassword));
             appUser.setUsername(adminUsername);
             appUserRepository.save(appUser);

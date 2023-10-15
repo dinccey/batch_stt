@@ -91,4 +91,9 @@ public class InferenceInstanceController {
         return ResponseEntity.ok(inferenceInstanceService.getAll(username));
     }
 
+    @GetMapping("/check")
+    public ResponseEntity<Boolean> checkIsOnline(@RequestParam(name = "basePath") final String basePath){
+        return ResponseEntity.ok(inferenceInstanceService.checkIsReachable(basePath));
+    }
+
 }

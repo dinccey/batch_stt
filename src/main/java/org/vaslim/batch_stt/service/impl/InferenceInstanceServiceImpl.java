@@ -10,6 +10,9 @@ import org.vaslim.batch_stt.repository.AppUserRepository;
 import org.vaslim.batch_stt.repository.InferenceInstanceRepository;
 import org.vaslim.batch_stt.service.InferenceInstanceService;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -21,7 +24,6 @@ public class InferenceInstanceServiceImpl implements InferenceInstanceService {
     private final InferenceInstanceRepository inferenceInstanceRepository;
 
     private final ModelMapper modelMapper;
-
     public InferenceInstanceServiceImpl(AppUserRepository appUserRepository, InferenceInstanceRepository inferenceInstanceRepository, ModelMapper modelMapper) {
         this.appUserRepository = appUserRepository;
         this.inferenceInstanceRepository = inferenceInstanceRepository;
@@ -75,5 +77,18 @@ public class InferenceInstanceServiceImpl implements InferenceInstanceService {
         Set<InferenceInstance> inferenceInstances = inferenceInstanceRepository.findAllByAppUser(appUser);
 
         return inferenceInstances.stream().map(inferenceInstance -> modelMapper.map(inferenceInstance, InferenceInstanceDTO.class)).collect(Collectors.toSet());
+    }
+
+    @Override
+    public Boolean checkIsReachable(String basePath) {
+        try {
+            URL url = new URL(basePath+"/docs");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            int responseCode = connection.getResponseCode();
+            return (responseCode == HttpURLConnection.HTTP_OK);
+        } catch (IOException e) {
+            return false;
+        }
     }
 }

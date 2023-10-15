@@ -3,8 +3,10 @@ package org.vaslim.batch_stt.service.impl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.vaslim.batch_stt.enums.ProcessingStatus;
+import org.vaslim.batch_stt.model.InferenceInstance;
 import org.vaslim.batch_stt.model.Item;
 import org.vaslim.batch_stt.pool.ConnectionPool;
+import org.vaslim.batch_stt.repository.InferenceInstanceRepository;
 import org.vaslim.batch_stt.repository.ItemRepository;
 import org.vaslim.batch_stt.service.FileService;
 import org.vaslim.batch_stt.service.WhisperClientService;
@@ -23,7 +25,7 @@ public class WhisperClientServiceImpl implements WhisperClientService {
     @Value("${filesystem.path}")
     private String filesystemPath;
 
-    @Value("${OUTPUT_FORMAT}")
+    @Value("${output.format}")
     private String outputFormat;
 
     private final FileService fileService;
@@ -32,10 +34,13 @@ public class WhisperClientServiceImpl implements WhisperClientService {
 
     private final ConnectionPool connectionPool;
 
-    public WhisperClientServiceImpl(FileService fileService, ItemRepository itemRepository, ConnectionPool connectionPool) {
+    private final InferenceInstanceRepository inferenceInstanceRepository;
+
+    public WhisperClientServiceImpl(FileService fileService, ItemRepository itemRepository, ConnectionPool connectionPool, InferenceInstanceRepository inferenceInstanceRepository) {
         this.fileService = fileService;
         this.itemRepository = itemRepository;
         this.connectionPool = connectionPool;
+        this.inferenceInstanceRepository = inferenceInstanceRepository;
     }
 
     @Override
@@ -64,6 +69,11 @@ public class WhisperClientServiceImpl implements WhisperClientService {
                     } catch (IOException e) {
                         e.printStackTrace();
                         updateItemStatus(videoFile, ProcessingStatus.PENDING);
+                        InferenceInstance inferenceInstance = inferenceInstanceRepository.findByInstanceUrl(endpointsApi[0].getApiClient().getBasePath()).orElse(null);
+                        assert inferenceInstance != null;
+                        inferenceInstance.setAvailable(false);
+                        inferenceInstanceRepository.save(inferenceInstance);
+
                     } finally {
                         connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
                     }

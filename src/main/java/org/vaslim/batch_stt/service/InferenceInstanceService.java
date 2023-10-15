@@ -16,4 +16,6 @@ public interface InferenceInstanceService {
     InferenceInstanceDTO enableInferenceInstance(InferenceInstanceDTO inferenceInstanceDTO, String username);
 
     Set<InferenceInstanceDTO> getAll(String username);
+
+    Boolean checkIsReachable(String basePath);
 }

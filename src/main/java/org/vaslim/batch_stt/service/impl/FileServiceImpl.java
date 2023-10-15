@@ -28,11 +28,14 @@ public class FileServiceImpl implements FileService {
 
     private final ItemRepository itemRepository;
 
-    @Value("${OUTPUT_FORMAT}")
+    @Value("${output.format}")
     private String outputFormat;
 
     @Value("${mp3.save}")
     private boolean saveAudio;
+
+    @Value("${excluded.paths}")
+    private String[] excludedPaths;
 
     public FileServiceImpl(ItemRepository itemRepository) {
         this.itemRepository = itemRepository;
@@ -55,15 +58,18 @@ public class FileServiceImpl implements FileService {
             List<Path> fileList = paths.filter(Files::isRegularFile).toList();
             Set<String> filePaths = new HashSet<>();
             for (Path filePath : fileList) {
-                filePaths.add(filePath.toString());
+                if(Arrays.stream(excludedPaths).noneMatch(filePath::startsWith)){
+                    filePaths.add(filePath.toString());
+                }
             }
             List<String> videoPaths = filePaths.stream().filter(filePath -> !filePath.endsWith(outputFormat)).toList();
             videoPaths.forEach(this::saveToProcess);
             List<String> textPaths = filePaths.stream().filter(filePath -> filePath.endsWith(outputFormat)).toList();
             textPaths.forEach(textPath->{
-                if(Constants.Files.transcribeExtensions.stream().anyMatch(path.getFileName().toString()::contains)){
+                if(Constants.Files.transcribeExtensions.stream().anyMatch(textPath::contains)){
                     String subtitleName = textPath.substring(0,textPath.lastIndexOf("."));
-                    String videoPath = videoPaths.stream().filter(video->video.substring(0,video.lastIndexOf(".")).equals(subtitleName)).findFirst().get();
+                    String videoPath = videoPaths.stream().filter(video->video.substring(0,video.lastIndexOf(".")).equals(subtitleName)
+                            && Constants.Files.ignoreExtensions.stream().noneMatch(video::endsWith)).findFirst().get();
                     saveAsProcessed(videoPath, textPath);
                 }
             });

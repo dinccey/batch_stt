@@ -23,7 +23,7 @@ public class FilteringScheduledTask {
 
     @Scheduled(cron = "${job.cron}")
     public void run() {
-        if(filterMapFilePath.isPresent()){
+        if(filterMapFilePath.isPresent() && !filterMapFilePath.get().trim().isEmpty()){
             Map<String,String> filterMap = textFilteringService.loadFilterMap(filterMapFilePath.get());
             textFilteringService.processTextFiles(filterMap);
         }
