@@ -62,16 +62,15 @@ public class FileServiceImpl implements FileService {
                     filePaths.add(filePath.toString());
                 }
             }
-            List<String> videoPaths = filePaths.stream().filter(filePath -> !filePath.endsWith(outputFormat)).toList();
+            List<String> videoPaths = filePaths.stream().filter(filePath -> !filePath.endsWith(outputFormat)
+                    && !filePath.contains(outputFormat + "+")).toList();
             videoPaths.forEach(this::saveToProcess);
-            List<String> textPaths = filePaths.stream().filter(filePath -> filePath.endsWith(outputFormat)).toList();
+            List<String> textPaths = filePaths.stream().filter(filePath -> Constants.Files.transcribeExtensions.stream().anyMatch(filePath::endsWith)).toList();
             textPaths.forEach(textPath->{
-                if(Constants.Files.transcribeExtensions.stream().anyMatch(textPath::contains)){
-                    String subtitleName = textPath.substring(0,textPath.lastIndexOf("."));
-                    String videoPath = videoPaths.stream().filter(video->video.substring(0,video.lastIndexOf(".")).equals(subtitleName)
-                            && Constants.Files.ignoreExtensions.stream().noneMatch(video::endsWith)).findFirst().get();
-                    saveAsProcessed(videoPath, textPath);
-                }
+                String subtitleName = textPath.substring(0,textPath.lastIndexOf("."));
+                String videoPath = videoPaths.stream().filter(video->video.substring(0,video.lastIndexOf(".")).equals(subtitleName)
+                        && Constants.Files.ignoreExtensions.stream().noneMatch(video::endsWith)).findFirst().get();
+                saveAsProcessed(videoPath, textPath);
             });
 
         } catch (IOException | NoSuchElementException e) {
