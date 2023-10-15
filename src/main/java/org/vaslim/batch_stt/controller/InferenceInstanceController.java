@@ -8,8 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.WebUtils;
 import org.vaslim.batch_stt.dto.InferenceInstanceDTO;
+import org.vaslim.batch_stt.dto.StatisticsDTO;
 import org.vaslim.batch_stt.pool.ConnectionPool;
 import org.vaslim.batch_stt.service.InferenceInstanceService;
+import org.vaslim.batch_stt.service.StatisticsService;
 import org.vaslim.batch_stt.util.JwtUtils;
 
 import java.util.Set;
@@ -28,10 +30,13 @@ public class InferenceInstanceController {
 
     private final ConnectionPool connectionPool;
 
-    public InferenceInstanceController(JwtUtils jwtUtils, InferenceInstanceService inferenceInstanceService, ConnectionPool connectionPool) {
+    private final StatisticsService statisticsService;
+
+    public InferenceInstanceController(JwtUtils jwtUtils, InferenceInstanceService inferenceInstanceService, ConnectionPool connectionPool, StatisticsService statisticsService) {
         this.jwtUtils = jwtUtils;
         this.inferenceInstanceService = inferenceInstanceService;
         this.connectionPool = connectionPool;
+        this.statisticsService = statisticsService;
     }
 
     @PostMapping("/add")
@@ -94,6 +99,15 @@ public class InferenceInstanceController {
     @GetMapping("/check")
     public ResponseEntity<Boolean> checkIsOnline(@RequestParam(name = "basePath") final String basePath){
         return ResponseEntity.ok(inferenceInstanceService.checkIsReachable(basePath));
+    }
+
+    @GetMapping("/statistics")
+    public ResponseEntity<StatisticsDTO> getStatistics(final HttpServletRequest httpServletRequest){
+        Cookie cookie = WebUtils.getCookie(httpServletRequest, cookieName);
+        assert cookie != null;
+        String username = jwtUtils.getUserNameFromJwtToken(cookie.getValue());
+
+        return ResponseEntity.ok(statisticsService.getUserStatistics(username));
     }
 
 }

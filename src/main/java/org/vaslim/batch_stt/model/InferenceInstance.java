@@ -18,6 +18,9 @@ public class InferenceInstance {
     @Column
     private Boolean available;
 
+    @Column
+    private Integer itemsProcessed = 0;
+
     @ManyToOne
     @JoinColumn(name="appUser", nullable=false)
     private AppUser appUser;
@@ -52,5 +55,13 @@ public class InferenceInstance {
 
     public void setAvailable(Boolean available) {
         this.available = available;
+    }
+
+    public Integer getItemsProcessed() {
+        return itemsProcessed;
+    }
+
+    public void setItemsProcessed(Integer itemsProcessed) {
+        this.itemsProcessed = itemsProcessed;
     }
 }

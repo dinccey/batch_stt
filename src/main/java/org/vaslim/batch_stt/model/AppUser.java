@@ -23,8 +23,19 @@ public class AppUser {
     @Column(updatable = false)
     private boolean admin = false;
 
+    @Column
+    private Integer itemsProcessed = 0;
+
     @OneToMany(mappedBy="appUser", cascade = CascadeType.ALL)
     private Set<InferenceInstance> inferenceInstances;
+
+    public Integer getItemsProcessed() {
+        return itemsProcessed;
+    }
+
+    public void setItemsProcessed(Integer itemsProcessed) {
+        this.itemsProcessed = itemsProcessed;
+    }
 
     public Long getId() {
         return id;

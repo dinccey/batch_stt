@@ -9,6 +9,7 @@ import org.vaslim.batch_stt.pool.ConnectionPool;
 import org.vaslim.batch_stt.repository.InferenceInstanceRepository;
 import org.vaslim.batch_stt.repository.ItemRepository;
 import org.vaslim.batch_stt.service.FileService;
+import org.vaslim.batch_stt.service.StatisticsService;
 import org.vaslim.batch_stt.service.WhisperClientService;
 import org.vaslim.whisper_asr.client.api.EndpointsApi;
 
@@ -36,11 +37,14 @@ public class WhisperClientServiceImpl implements WhisperClientService {
 
     private final InferenceInstanceRepository inferenceInstanceRepository;
 
-    public WhisperClientServiceImpl(FileService fileService, ItemRepository itemRepository, ConnectionPool connectionPool, InferenceInstanceRepository inferenceInstanceRepository) {
+    private final StatisticsService statisticsService;
+
+    public WhisperClientServiceImpl(FileService fileService, ItemRepository itemRepository, ConnectionPool connectionPool, InferenceInstanceRepository inferenceInstanceRepository, StatisticsService statisticsService) {
         this.fileService = fileService;
         this.itemRepository = itemRepository;
         this.connectionPool = connectionPool;
         this.inferenceInstanceRepository = inferenceInstanceRepository;
+        this.statisticsService = statisticsService;
     }
 
     @Override
@@ -65,6 +69,7 @@ public class WhisperClientServiceImpl implements WhisperClientService {
                         fileService.processFile(audioFile, outputFileNamePath, endpointsApi[0]);
                         if (new File(outputFileNamePath).exists()){
                             fileService.saveAsProcessed(videoPath , outputFileNamePath);
+                            statisticsService.incrementProcessedItemsPerInstance(endpointsApi[0].getApiClient().getBasePath());
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

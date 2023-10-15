@@ -36,6 +36,7 @@ public class InferenceInstanceServiceImpl implements InferenceInstanceService {
         InferenceInstance inferenceInstance = modelMapper.map(inferenceInstanceDTO, InferenceInstance.class);
         AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(()-> new BatchSttException("User not found"));
         inferenceInstance.setAppUser(appUser);
+        inferenceInstance.setItemsProcessed(0);
 
         return modelMapper.map(inferenceInstanceRepository.save(inferenceInstance), InferenceInstanceDTO.class);
     }

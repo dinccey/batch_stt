@@ -37,6 +37,7 @@ public class AdminUserConfiguration {
             appUser.setId(1L);
             appUser.setPassword(passwordEncoder.encode(adminPlaintextPassword));
             appUser.setUsername(adminUsername);
+            appUser.setItemsProcessed(0);
             appUserRepository.save(appUser);
         } catch (Exception e){
             e.printStackTrace();

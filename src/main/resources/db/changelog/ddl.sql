@@ -1,36 +1,40 @@
 create table batchstt.app_user
 (
-    id       bigint       not null
+    admin           bit          null,
+    items_processed int default 0 null,
+    id              bigint       not null
         primary key,
-    password varchar(255) null,
-    username varchar(255) null,
-    admin    bit          null
+    password        varchar(255) null,
+    username        varchar(255) null
 );
-
-
 
 create table app_user_seq
 (
     next_val bigint null
 );
 
-create table inference_instance
+create table batchstt.inference_instance
 (
-    available    bit          null,
-    app_user     bigint       not null,
-    id           bigint       not null
+    available       bit           null,
+    items_processed int default 0 null,
+    app_user        bigint        not null,
+    id              bigint        not null
         primary key,
-    instance_url varchar(255) not null,
+    instance_url    varchar(255)  not null,
     constraint FKq7g6n0onkc20wkevyjq42s1or
-        foreign key (app_user) references app_user (id)
+        foreign key (app_user) references batchstt.app_user (id)
 );
+
+
+
+
 
 create table inference_instance_seq
 (
     next_val bigint null
 );
 
-create table item
+create table batchstt.item
 (
     id                  bigint                                      not null
         primary key,
@@ -45,6 +49,7 @@ create table item
     constraint UK_e41r3dh4254ukhajg5g9y8at2
         unique (file_path_text)
 );
+
 
 create table item_seq
 (

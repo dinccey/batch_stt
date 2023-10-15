@@ -11,6 +11,16 @@ public class InferenceInstanceDTO {
 
     private Boolean available;
 
+    private Integer itemsProcessed;
+
+    public Integer getItemsProcessed() {
+        return itemsProcessed;
+    }
+
+    public void setItemsProcessed(Integer itemsProcessed) {
+        this.itemsProcessed = itemsProcessed;
+    }
+
     public Long getId() {
         return id;
     }
