@@ -22,6 +22,7 @@ services:
       - DATASOURCE_URL=jdbc:mysql://batchstt-db:3306/batchstt
       - DATASOURCE_USERNAME=batchstt
       - DATASOURCE_PASSWORD=securepasswordlocal
+      - EXCLUDED_PATHS=
     volumes:
       #mount video path to /mnt/videos/FOLDER_NAME, possible multiple different mounts, just use different FOLDER_NAME
       - /var/home/vaslim/Container/batchtool/folder1:/mnt/videos/folder1:rw

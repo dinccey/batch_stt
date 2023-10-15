@@ -3,16 +3,22 @@ package org.vaslim.batch_stt.service.impl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.vaslim.batch_stt.enums.ProcessingStatus;
+import org.vaslim.batch_stt.model.InferenceInstance;
 import org.vaslim.batch_stt.model.Item;
+import org.vaslim.batch_stt.pool.ConnectionPool;
+import org.vaslim.batch_stt.repository.InferenceInstanceRepository;
 import org.vaslim.batch_stt.repository.ItemRepository;
 import org.vaslim.batch_stt.service.FileService;
+import org.vaslim.batch_stt.service.StatisticsService;
 import org.vaslim.batch_stt.service.WhisperClientService;
+import org.vaslim.whisper_asr.client.api.EndpointsApi;
 
 import java.io.*;
 import java.nio.file.Path;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import static java.lang.Thread.sleep;
 
 @Service
 public class WhisperClientServiceImpl implements WhisperClientService {
@@ -20,16 +26,25 @@ public class WhisperClientServiceImpl implements WhisperClientService {
     @Value("${filesystem.path}")
     private String filesystemPath;
 
-    @Value("${OUTPUT_FORMAT}")
+    @Value("${output.format}")
     private String outputFormat;
 
     private final FileService fileService;
 
     private final ItemRepository itemRepository;
 
-    public WhisperClientServiceImpl(FileService fileService, ItemRepository itemRepository) {
+    private final ConnectionPool connectionPool;
+
+    private final InferenceInstanceRepository inferenceInstanceRepository;
+
+    private final StatisticsService statisticsService;
+
+    public WhisperClientServiceImpl(FileService fileService, ItemRepository itemRepository, ConnectionPool connectionPool, InferenceInstanceRepository inferenceInstanceRepository, StatisticsService statisticsService) {
         this.fileService = fileService;
         this.itemRepository = itemRepository;
+        this.connectionPool = connectionPool;
+        this.inferenceInstanceRepository = inferenceInstanceRepository;
+        this.statisticsService = statisticsService;
     }
 
     @Override
@@ -39,17 +54,41 @@ public class WhisperClientServiceImpl implements WhisperClientService {
             String videoPath = item.getFilePathVideo();
             File videoFile = new File(videoPath);
             updateItemStatus(videoFile, ProcessingStatus.IN_PROGRESS);
-            try {
-                String outputFileNamePath = videoFile.getAbsolutePath().substring(0,videoFile.getAbsolutePath().lastIndexOf(".")) + "." + outputFormat;
-                File audioFile = fileService.extractAudio(videoFile);
-                fileService.processFile(audioFile, outputFileNamePath);
-                if (new File(outputFileNamePath).exists()){
-                    fileService.saveAsProcessed(videoPath , outputFileNamePath);
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
-                updateItemStatus(videoFile, ProcessingStatus.PENDING);
+
+            final EndpointsApi[] endpointsApi = new EndpointsApi[1];
+            while (endpointsApi[0] == null){
+                endpointsApi[0] = connectionPool.getConnection();
+                sleepMilis(500L);
             }
+            new Thread(() -> {
+                try {
+                    String outputFileNamePath = videoFile.getAbsolutePath().substring(0,videoFile.getAbsolutePath().lastIndexOf(".")) + "." + outputFormat;
+                    File audioFile = fileService.extractAudio(videoFile);
+
+                    try {
+                        fileService.processFile(audioFile, outputFileNamePath, endpointsApi[0]);
+                        if (new File(outputFileNamePath).exists()){
+                            fileService.saveAsProcessed(videoPath , outputFileNamePath);
+                            statisticsService.incrementProcessedItemsPerInstance(endpointsApi[0].getApiClient().getBasePath());
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        updateItemStatus(videoFile, ProcessingStatus.PENDING);
+                        InferenceInstance inferenceInstance = inferenceInstanceRepository.findByInstanceUrl(endpointsApi[0].getApiClient().getBasePath()).orElse(null);
+                        assert inferenceInstance != null;
+                        inferenceInstance.setAvailable(false);
+                        inferenceInstanceRepository.save(inferenceInstance);
+
+                    } finally {
+                        connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    updateItemStatus(videoFile, ProcessingStatus.PENDING);
+                    connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
+                }
+            }).start();
+
         });
     }
 
@@ -71,6 +110,14 @@ public class WhisperClientServiceImpl implements WhisperClientService {
                 fileService.findUnprocessedFiles(Path.of(directory+ "/"+ dir));
             }
             fileService.findUnprocessedFiles(Path.of(directory.getAbsolutePath()));
+        }
+    }
+
+    private void sleepMilis(Long milis){
+        try {
+            sleep(milis);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
         }
     }
 

@@ -12,7 +12,9 @@ import org.vaslim.batch_stt.repository.ItemRepository;
 import org.vaslim.batch_stt.service.FileService;
 import org.vaslim.whisper_asr.client.api.EndpointsApi;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
@@ -23,26 +25,29 @@ import java.util.stream.Stream;
 public class FileServiceImpl implements FileService {
 
     private static final String TASK_TRANSCRIBE = "transcribe";
-    private final EndpointsApi endpointsApi;
 
     private final ItemRepository itemRepository;
 
-    @Value("${OUTPUT_FORMAT}")
+    @Value("${output.format}")
     private String outputFormat;
 
-    public FileServiceImpl(EndpointsApi endpointsApi, ItemRepository itemRepository) {
-        this.endpointsApi = endpointsApi;
+    @Value("${mp3.save}")
+    private boolean saveAudio;
+
+    @Value("${excluded.paths}")
+    private String[] excludedPaths;
+
+    public FileServiceImpl(ItemRepository itemRepository) {
         this.itemRepository = itemRepository;
     }
 
     @Override
-    public File processFile(File file, String outputFilePathName) throws IOException {
+    public File processFile(File file, String outputFilePathName, EndpointsApi endpointsApi) throws IOException {
 
         byte[] fileContent = endpointsApi.asrAsrPost(file, TASK_TRANSCRIBE,"","", true, outputFormat);
         FileOutputStream fos = new FileOutputStream(outputFilePathName);
         fos.write(fileContent);
         fos.close();
-        file.delete();
 
         return file;
     }
@@ -53,14 +58,18 @@ public class FileServiceImpl implements FileService {
             List<Path> fileList = paths.filter(Files::isRegularFile).toList();
             Set<String> filePaths = new HashSet<>();
             for (Path filePath : fileList) {
-                filePaths.add(filePath.toString());
+                if(Arrays.stream(excludedPaths).noneMatch(filePath::startsWith)){
+                    filePaths.add(filePath.toString());
+                }
             }
-            List<String> videoPaths = filePaths.stream().filter(filePath -> !filePath.endsWith(outputFormat)).toList();
+            List<String> videoPaths = filePaths.stream().filter(filePath -> !filePath.endsWith(outputFormat)
+                    && !filePath.contains(outputFormat + "+")).toList();
             videoPaths.forEach(this::saveToProcess);
-            List<String> textPaths = filePaths.stream().filter(filePath -> filePath.endsWith(outputFormat)).toList();
+            List<String> textPaths = filePaths.stream().filter(filePath -> Constants.Files.transcribeExtensions.stream().anyMatch(filePath::endsWith)).toList();
             textPaths.forEach(textPath->{
                 String subtitleName = textPath.substring(0,textPath.lastIndexOf("."));
-                String videoPath = videoPaths.stream().filter(video->video.substring(0,video.lastIndexOf(".")).equals(subtitleName)).findFirst().get();
+                String videoPath = videoPaths.stream().filter(video->video.substring(0,video.lastIndexOf(".")).equals(subtitleName)
+                        && Constants.Files.ignoreExtensions.stream().noneMatch(video::endsWith)).findFirst().get();
                 saveAsProcessed(videoPath, textPath);
             });
 
@@ -72,9 +81,14 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public File extractAudio(File videoFile) throws IOException {
-
-        File audioFile = new File("tmp.mp3");
-
+        String audioFileName = "tmp.mp3";
+        if(saveAudio){
+            audioFileName = videoFile.getAbsolutePath().substring(0, videoFile.getAbsolutePath().lastIndexOf(".")) + ".mp3";
+        }
+        File audioFile = new File(audioFileName);
+        if(audioFile.exists()){
+            return audioFile;
+        }
         try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(videoFile)) {
             grabber.setOption("-vn","");
             grabber.start();
@@ -104,7 +118,8 @@ public class FileServiceImpl implements FileService {
     @Override
     public void saveToProcess(String path){
         if(itemRepository.existsItemByFilePathVideoLike(path)
-                || Constants.Files.transcribeExtensions.stream().anyMatch(path::contains)) return;
+                || Constants.Files.transcribeExtensions.stream().anyMatch(path::contains)
+                || Constants.Files.ignoreExtensions.stream().anyMatch(path::contains)) return;
         Item item = new Item();
         item.setFilePathVideo(path);
         itemRepository.save(item);
