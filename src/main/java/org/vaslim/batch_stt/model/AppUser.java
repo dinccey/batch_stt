@@ -9,12 +9,7 @@ import java.util.Set;
 public class AppUser {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO, generator = "appUserSeq")
-    @SequenceGenerator(name = "appUserSeq", sequenceName = "app_user_seq", allocationSize = 1)
-    @Column(name = "id", unique = true, nullable = false)
-    private Long id;
-
-    @Column
+    @Column(name = "username", unique = true, nullable = false)
     private String username;
 
     @Column
@@ -35,14 +30,6 @@ public class AppUser {
 
     public void setItemsProcessed(Integer itemsProcessed) {
         this.itemsProcessed = itemsProcessed;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getUsername() {

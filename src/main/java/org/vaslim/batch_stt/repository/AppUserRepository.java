@@ -10,5 +10,7 @@ import java.util.Optional;
 public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     Optional<AppUser> findByUsername(String username);
 
-    Integer removeAppUserByAdminIsTrue();
+    void removeAppUserByAdminIsTrue();
+
+    void removeAppUserByUsername(String username);
 }

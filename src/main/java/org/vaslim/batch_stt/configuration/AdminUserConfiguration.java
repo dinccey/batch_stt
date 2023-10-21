@@ -31,10 +31,9 @@ public class AdminUserConfiguration {
     @Transactional
     public void contextRefreshedEvent() {
         try {
-            appUserRepository.removeAppUserByAdminIsTrue();
+            appUserRepository.removeAppUserByUsername(adminUsername);
             AppUser appUser = new AppUser();
             appUser.setAdmin(true);
-            appUser.setId(1L);
             appUser.setPassword(passwordEncoder.encode(adminPlaintextPassword));
             appUser.setUsername(adminUsername);
             appUser.setItemsProcessed(0);
