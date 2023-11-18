@@ -8,13 +8,13 @@ import org.vaslim.batch_stt.service.WhisperClientService;
 @Component
 @EnableScheduling
 public class TranscribingScheduledTask {
-    private WhisperClientService whisperClientService;
+    private final WhisperClientService whisperClientService;
 
     public TranscribingScheduledTask(WhisperClientService whisperClientService) {
         this.whisperClientService = whisperClientService;
     }
 
-    @Scheduled(cron = "${JOB_CRON}")
+    @Scheduled(cron = "${job.cron}")
     public void run() {
         whisperClientService.findUnprocessedFiles();
         whisperClientService.processAllFiles();

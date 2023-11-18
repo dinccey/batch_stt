@@ -1,33 +1,32 @@
 package org.vaslim.batch_stt.service.impl;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.vaslim.batch_stt.model.AppUser;
 
+import java.io.Serial;
 import java.util.Collection;
 import java.util.Objects;
 
 public class UserDetailsImpl implements UserDetails
 {
+    @Serial
     private static final long serialVersionUID = 1L;
 
+    private final String username;
 
-    @Value("${spring.security.user.name}")
-    private String username = "admin";
-
-    @JsonIgnore
-    @Value("${spring.security.user.password}")
-    private String password = "$2a$10$RAn1Kc59SVdsBNLcrlDg5OCIYTZNu9WmRRx1wtpAqQ78eC6AMe4Oa";
+    private final String password;
 
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UserDetailsImpl() {
+    public UserDetailsImpl(AppUser appUser) {
+        this.username = appUser.getUsername();
+        this.password = appUser.getPassword();
     }
 
-    public static UserDetailsImpl build() {
+    public static UserDetailsImpl build(AppUser appUser) {
 
-       return new UserDetailsImpl();
+       return new UserDetailsImpl(appUser);
     }
 
     @Override
