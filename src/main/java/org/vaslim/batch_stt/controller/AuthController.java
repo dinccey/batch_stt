@@ -12,7 +12,7 @@ import org.vaslim.batch_stt.service.impl.UserDetailsImpl;
 import org.vaslim.batch_stt.util.JwtUtils;
 
 
-@CrossOrigin(origins = "*", maxAge = 3600)
+@CrossOrigin(origins = "${frontend.origin}", maxAge = 3600, allowCredentials = "true")
 @RestController
 @RequestMapping("api/v1/auth")
 public class AuthController

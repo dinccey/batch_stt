@@ -13,12 +13,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.vaslim.batch_stt.filters.AuthTokenFilter;
-
-import static org.vaslim.batch_stt.constants.Constants.Endpoint.ALL_PATHS;
 
 @Configuration
 @EnableMethodSecurity
@@ -78,13 +73,31 @@ public class WebSecurityConfig {
     }
 
 
-    @Bean
+    /**@Bean
     CorsConfigurationSource corsConfigurationSource() {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
-        CorsConfiguration corsConfiguration = new CorsConfiguration().applyPermitDefaultValues();
+        CorsConfiguration corsConfiguration = new CorsConfiguration();
+        corsConfiguration.setAllowCredentials(true);
+        corsConfiguration.addAllowedOrigin("http://localhost:8081");
+        corsConfiguration.addAllowedHeader("Content-Type");
+        corsConfiguration.addAllowedHeader("x-xsrf-token");
+        corsConfiguration.addAllowedHeader("Authorization");
+        corsConfiguration.addAllowedHeader("Access-Control-Allow-Headers");
+        corsConfiguration.addAllowedHeader("Access-Control-Allow-Origin");
+        corsConfiguration.addAllowedHeader("Origin");
+        corsConfiguration.addAllowedHeader("Accept");
+        corsConfiguration.addAllowedHeader("X-Requested-With");
+        corsConfiguration.addAllowedHeader("Access-Control-Request-Method");
+        corsConfiguration.addAllowedHeader("Access-Control-Request-Headers");
+        corsConfiguration.addAllowedMethod("OPTIONS");
+        corsConfiguration.addAllowedMethod("GET");
+        corsConfiguration.addAllowedMethod("PUT");
+        corsConfiguration.addAllowedMethod("POST");
+        corsConfiguration.addAllowedMethod("DELETE");
+        source.registerCorsConfiguration("/**", corsConfiguration);
         source.registerCorsConfiguration(ALL_PATHS, corsConfiguration);
 
         return source;
-    }
+    }**/
 }
