@@ -23,6 +23,7 @@ services:
       - DATASOURCE_USERNAME=batchstt
       - DATASOURCE_PASSWORD=securepasswordlocal
       - EXCLUDED_PATHS=
+      - FRONTEND_ORIGIN_URL=http://localhost:8081
     volumes:
       #mount video path to /mnt/videos/FOLDER_NAME, possible multiple different mounts, just use different FOLDER_NAME
       - /var/home/vaslim/Container/batchtool/folder1:/mnt/videos/folder1:rw
