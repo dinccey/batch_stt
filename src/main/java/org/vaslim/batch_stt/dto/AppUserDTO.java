@@ -1,7 +1,5 @@
 package org.vaslim.batch_stt.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 public class AppUserDTO {
     private String username;
 
@@ -19,7 +17,6 @@ public class AppUserDTO {
         this.password = password;
     }
 
-    @JsonIgnore
     public void setAdmin(boolean admin) {
         this.admin = admin;
     }
