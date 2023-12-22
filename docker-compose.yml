@@ -26,5 +26,4 @@ services:
 
 networks:
   batchstt:
-    driver: default
 
