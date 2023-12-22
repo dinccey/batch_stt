@@ -7,3 +7,9 @@ services:
       ASR_ENGINE: ${ASR_ENGINE}
     ports:
       - "9000:9000"
+    #networks:
+    #  - batchstt
+
+#networks:
+#  batchstt:
+#    driver: default
