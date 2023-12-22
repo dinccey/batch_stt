@@ -1,5 +1,4 @@
 version: '3'
-#deploy with: docker compose up -d
 services:
   app-be:
     image: 'vaslim/batchstt'
@@ -8,57 +7,21 @@ services:
     ports:
       - "8080:8080"
     environment:
-      #active profile, one of: local, dev, prod
-      - SPRING_PROFILES_ACTIVE=dev
-      #whisper asr urls, comma separated if multiple by default (others can be added via API, dynamically)
-      - WHISPER_API_URLS=http://openai-whisper-asr-webservice:9000
-     # - FILESYSTEM_PATH=/var/home/vaslim/Videos/batchtool #path where all the videos are stored
-      #output format, one of: txt, vtt, srt, json, tsv
-      - OUTPUT_FORMAT=srt
-      #cron schedule for automatic run
-      - JOB_CRON=0 0 14 * * ?
-      #path of the filer file for local use
-     # - FILTER_MAP_PATH=/some/path
-      - DATASOURCE_URL=jdbc:mysql://batchstt-db:3306/batchstt
-      - DATASOURCE_USERNAME=batchstt
-      - DATASOURCE_PASSWORD=securepasswordlocal
-      - EXCLUDED_PATHS=
-      - FRONTEND_ORIGIN_URL=http://localhost:8081
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - WHISPER_API_URLS=${WHISPER_API_URLS}
+      - OUTPUT_FORMAT=${OUTPUT_FORMAT}
+      - JOB_CRON=${JOB_CRON}
+      - DATASOURCE_URL=${DATASOURCE_URL}
+      - DATASOURCE_USERNAME=${DATASOURCE_USERNAME}
+      - DATASOURCE_PASSWORD=${DATASOURCE_PASSWORD}
+      - EXCLUDED_PATHS=${EXCLUDED_PATHS}
+      - FRONTEND_ORIGIN_URL=${FRONTEND_ORIGIN_URL}
+      - SPRING_SECURITY_USERNAME=${SPRING_SECURITY_USERNAME}
+      - SPRING_SECURITY_PASSWORD=${SPRING_SECURITY_PASSWORD}
     volumes:
-      #mount video path to /mnt/videos/FOLDER_NAME, possible multiple different mounts, just use different FOLDER_NAME
-      - /var/home/vaslim/Container/batchtool/folder1:/mnt/videos/folder1:rw
-      - /var/home/vaslim/Container/batchtool/folder2:/mnt/videos/folder2:rw
-      #mount the filter file
-      - /var/home/vaslim/Container/filter.txt:/etc/filter.txt:r
-    depends_on:
-      - batchstt-db
-      - openai-whisper-asr-webservice
+      - ${VIDEOS_PATH}:/mnt/videos/folder1:rw
+      - ${FILTER_FILE_PATH}:/etc/filter.txt:r
+    networks:
+      - batchstt
 
-  batchstt-db:
-    image: 'mysql:8.1'
-    container_name: batchstt-db
-    volumes:
-      - mysql:/var/lib/mysql
-    ports:
-      - "3306:3306"
-    environment:
-      - MYSQL_ROOT_PASSWORD=securepasswordlocal
-      - MYSQL_USER=batchstt
-      - MYSQL_PASSWORD=securepasswordlocal
-      - MYSQL_DATABASE=batchstt
-    restart: always
 
-  openai-whisper-asr-webservice:
-      #image: onerahmet/openai-whisper-asr-webservice:latest-gpu
-      image: onerahmet/openai-whisper-asr-webservice:latest
-      environment:
-        #Available ASR_MODELs are tiny, base, small, medium, large, large-v1 and large-v2. Please note that large and large-v2 are the same model.
-        #For English-only applications, the .en models tend to perform better, especially for the tiny.en and base.en models.
-        #We observed that the difference becomes less significant for the small.en and medium.en models.
-        ASR_MODEL: tiny.en
-        ASR_ENGINE: openai_whisper
-      ports:
-        - "9000:9000"
-
-volumes:
-  mysql:
