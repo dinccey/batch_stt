@@ -5,8 +5,6 @@ services:
     environment:
       ASR_MODEL: ${ASR_MODEL}
       ASR_ENGINE: ${ASR_ENGINE}
-    env_file:
-      - .env
     ports:
       - "9000:9000"
     #networks:
