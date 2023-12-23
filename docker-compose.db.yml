@@ -11,6 +11,8 @@ services:
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
       - MYSQL_DATABASE=${MYSQL_DATABASE}
     restart: always
+    env_file:
+      - .env
     networks:
       - batchstt
 
