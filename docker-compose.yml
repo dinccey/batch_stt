@@ -25,6 +25,7 @@ services:
     networks:
       - batchstt_net
 
+#docker network create batchstt_net
 networks:
   batchstt_net:
     external: true
