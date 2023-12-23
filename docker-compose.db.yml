@@ -12,10 +12,11 @@ services:
       - MYSQL_DATABASE=${MYSQL_DATABASE}
     restart: always
     networks:
-      - batchstt
+      - batchstt_net
 
 volumes:
   mysql:
 
 networks:
-  batchstt:
+  batchstt_net:
+    external: true
