@@ -71,7 +71,7 @@ public class AdminController {
         assert cookie != null;
         String username = jwtUtils.getUserNameFromJwtToken(cookie.getValue());
 
-        if(username.equals(adminUsername)){
+        if(adminService.isUserAdmin(username)){
 
             return ResponseEntity.ok(adminService.addUser(appUserDTO));
         }
@@ -84,7 +84,7 @@ public class AdminController {
         assert cookie != null;
         String username = jwtUtils.getUserNameFromJwtToken(cookie.getValue());
 
-        if(username.equals(adminUsername)){
+        if(adminService.isUserAdmin(username)){
 
             return ResponseEntity.ok(adminService.editUser(appUserDTO));
         }
@@ -97,7 +97,7 @@ public class AdminController {
         assert cookie != null;
         String username = jwtUtils.getUserNameFromJwtToken(cookie.getValue());
 
-        if(username.equals(adminUsername)){
+        if(adminService.isUserAdmin(username)){
             adminService.removeUser(user);
             return ResponseEntity.ok().build();
         }
@@ -110,7 +110,7 @@ public class AdminController {
         assert cookie != null;
         String username = jwtUtils.getUserNameFromJwtToken(cookie.getValue());
 
-        if(username.equals(adminUsername)){
+        if(adminService.isUserAdmin(username)){
             return ResponseEntity.ok(adminService.getAllUsers());
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

@@ -54,4 +54,9 @@ public class AdminServiceImpl implements AdminService {
     public Set<AppUserDTO> getAllUsers() {
         return appUserRepository.findAll().stream().map(appUser -> modelMapper.map(appUser, AppUserDTO.class)).collect(Collectors.toSet());
     }
+
+    @Override
+    public boolean isUserAdmin(String username) {
+        return appUserRepository.findByUsernameAndAdminTrue(username).isPresent();
+    }
 }
