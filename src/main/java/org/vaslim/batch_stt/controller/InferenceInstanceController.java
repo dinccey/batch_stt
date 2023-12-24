@@ -88,7 +88,7 @@ public class InferenceInstanceController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<Set<InferenceInstanceDTO>> authenticateUser(final HttpServletRequest httpServletRequest) {
+    public ResponseEntity<Set<InferenceInstanceDTO>> getAllInstances(final HttpServletRequest httpServletRequest) {
         Cookie cookie = WebUtils.getCookie(httpServletRequest, cookieName);
         assert cookie != null;
         String username = jwtUtils.getUserNameFromJwtToken(cookie.getValue());
