@@ -16,7 +16,8 @@ import org.vaslim.batch_stt.service.WhisperClientService;
 import org.vaslim.batch_stt.util.JwtUtils;
 
 import java.util.Set;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @CrossOrigin(origins = "${frontend.origin}", maxAge = 3600, allowCredentials = "true")
 @RestController
@@ -27,7 +28,8 @@ public class AdminController {
     private final WhisperClientService whisperClientService;
     private final JwtUtils jwtUtils;
     private final FilteringScheduledTask filteringScheduledTask;
-    private final ReentrantLock transcribingTaskReentrantLock;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();;
+
 
     private final AdminService adminService;
 
@@ -37,29 +39,20 @@ public class AdminController {
     @Value("${spring.security.user.name}")
     private String adminUsername;
 
-    public AdminController(TranscribingScheduledTask transcribingScheduledTask, WhisperClientService whisperClientService, JwtUtils jwtUtils, FilteringScheduledTask filteringScheduledTask, ReentrantLock transcribingTaskReentrantLock, AdminService adminService) {
+    public AdminController(TranscribingScheduledTask transcribingScheduledTask, WhisperClientService whisperClientService, JwtUtils jwtUtils, FilteringScheduledTask filteringScheduledTask, AdminService adminService) {
         this.transcribingScheduledTask = transcribingScheduledTask;
         this.whisperClientService = whisperClientService;
         this.jwtUtils = jwtUtils;
         this.filteringScheduledTask = filteringScheduledTask;
-        this.transcribingTaskReentrantLock = transcribingTaskReentrantLock;
         this.adminService = adminService;
     }
 
     @GetMapping("/run")
-    public ResponseEntity<?> run(final HttpServletRequest httpServletRequest){
+    public ResponseEntity<?> run(final HttpServletRequest httpServletRequest) {
         Cookie cookie = WebUtils.getCookie(httpServletRequest, cookieName);
         String username = jwtUtils.getUserNameFromJwtToken(cookie.getValue());
-        if(username.equals(adminUsername)){
-            if(transcribingTaskReentrantLock.tryLock()){
-                try {
-                    whisperClientService.findUnprocessedFiles();
-                    whisperClientService.processAllFiles();
-                    filteringScheduledTask.run();
-                } finally {
-                    transcribingTaskReentrantLock.unlock();
-                }
-            }
+        if (adminService.isUserAdmin(username)) {
+            executor.submit(transcribingScheduledTask::run);
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -71,7 +64,7 @@ public class AdminController {
         assert cookie != null;
         String username = jwtUtils.getUserNameFromJwtToken(cookie.getValue());
 
-        if(adminService.isUserAdmin(username)){
+        if (adminService.isUserAdmin(username)) {
 
             return ResponseEntity.ok(adminService.addUser(appUserDTO));
         }
@@ -84,7 +77,7 @@ public class AdminController {
         assert cookie != null;
         String username = jwtUtils.getUserNameFromJwtToken(cookie.getValue());
 
-        if(adminService.isUserAdmin(username)){
+        if (adminService.isUserAdmin(username)) {
 
             return ResponseEntity.ok(adminService.editUser(appUserDTO));
         }
@@ -92,12 +85,12 @@ public class AdminController {
     }
 
     @GetMapping("/user/remove/{username}")
-    public ResponseEntity<?> removeUser(@PathVariable("username") String user, final HttpServletRequest httpServletRequest){
+    public ResponseEntity<?> removeUser(@PathVariable("username") String user, final HttpServletRequest httpServletRequest) {
         Cookie cookie = WebUtils.getCookie(httpServletRequest, cookieName);
         assert cookie != null;
         String username = jwtUtils.getUserNameFromJwtToken(cookie.getValue());
 
-        if(adminService.isUserAdmin(username)){
+        if (adminService.isUserAdmin(username)) {
             adminService.removeUser(user);
             return ResponseEntity.ok().build();
         }
@@ -105,12 +98,12 @@ public class AdminController {
     }
 
     @GetMapping("user/all")
-    public ResponseEntity<Set<AppUserDTO>> allUsers(final HttpServletRequest httpServletRequest){
+    public ResponseEntity<Set<AppUserDTO>> allUsers(final HttpServletRequest httpServletRequest) {
         Cookie cookie = WebUtils.getCookie(httpServletRequest, cookieName);
         assert cookie != null;
         String username = jwtUtils.getUserNameFromJwtToken(cookie.getValue());
 
-        if(adminService.isUserAdmin(username)){
+        if (adminService.isUserAdmin(username)) {
             return ResponseEntity.ok(adminService.getAllUsers());
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
