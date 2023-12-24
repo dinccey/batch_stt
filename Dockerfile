@@ -1,4 +1,4 @@
-FROM maven:3-amazoncorretto-17-debian-bookworm AS builder
+FROM maven:3.9.4-amazoncorretto-17 AS builder
 WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline
@@ -8,7 +8,7 @@ COPY src ./src
 RUN mvn package -Dmaven.test.skip
 
 # Second stage: run the jar using Corretto
-FROM amazoncorretto:17-alpine
+FROM amazoncorretto:17-al2023-headful
 COPY --from=pkg /app/target/*.jar app.jar
 RUN mkdir /mnt/ftp
 EXPOSE 8080
