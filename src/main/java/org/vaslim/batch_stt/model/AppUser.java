@@ -15,7 +15,7 @@ public class AppUser {
     @Column
     private String password;
 
-    @Column(updatable = false)
+    @Column
     private boolean admin = false;
 
     @Column
