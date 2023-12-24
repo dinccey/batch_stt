@@ -16,6 +16,7 @@ import org.vaslim.batch_stt.service.WhisperClientService;
 import org.vaslim.batch_stt.util.JwtUtils;
 
 import java.util.Set;
+import java.util.concurrent.locks.ReentrantLock;
 
 @CrossOrigin(origins = "${frontend.origin}", maxAge = 3600, allowCredentials = "true")
 @RestController
@@ -26,6 +27,7 @@ public class AdminController {
     private final WhisperClientService whisperClientService;
     private final JwtUtils jwtUtils;
     private final FilteringScheduledTask filteringScheduledTask;
+    private final ReentrantLock transcribingTaskReentrantLock;
 
     private final AdminService adminService;
 
@@ -35,11 +37,12 @@ public class AdminController {
     @Value("${spring.security.user.name}")
     private String adminUsername;
 
-    public AdminController(TranscribingScheduledTask transcribingScheduledTask, WhisperClientService whisperClientService, JwtUtils jwtUtils, FilteringScheduledTask filteringScheduledTask, AdminService adminService) {
+    public AdminController(TranscribingScheduledTask transcribingScheduledTask, WhisperClientService whisperClientService, JwtUtils jwtUtils, FilteringScheduledTask filteringScheduledTask, ReentrantLock transcribingTaskReentrantLock, AdminService adminService) {
         this.transcribingScheduledTask = transcribingScheduledTask;
         this.whisperClientService = whisperClientService;
         this.jwtUtils = jwtUtils;
         this.filteringScheduledTask = filteringScheduledTask;
+        this.transcribingTaskReentrantLock = transcribingTaskReentrantLock;
         this.adminService = adminService;
     }
 
@@ -48,9 +51,15 @@ public class AdminController {
         Cookie cookie = WebUtils.getCookie(httpServletRequest, cookieName);
         String username = jwtUtils.getUserNameFromJwtToken(cookie.getValue());
         if(username.equals(adminUsername)){
-            whisperClientService.findUnprocessedFiles();
-            whisperClientService.processAllFiles();
-            filteringScheduledTask.run();
+            if(transcribingTaskReentrantLock.tryLock()){
+                try {
+                    whisperClientService.findUnprocessedFiles();
+                    whisperClientService.processAllFiles();
+                    filteringScheduledTask.run();
+                } finally {
+                    transcribingTaskReentrantLock.unlock();
+                }
+            }
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
