@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.vaslim.batch_stt.constants.Constants;
 import org.vaslim.batch_stt.enums.ProcessingStatus;
+import org.vaslim.batch_stt.exception.BatchSttException;
 import org.vaslim.batch_stt.model.Item;
 import org.vaslim.batch_stt.repository.ItemRepository;
 import org.vaslim.batch_stt.service.FileService;
@@ -75,6 +76,7 @@ public class FileServiceImpl implements FileService {
 
         } catch (IOException | NoSuchElementException e) {
             e.printStackTrace();
+            throw new BatchSttException(e.getMessage());
         }
 
     }
@@ -117,12 +119,16 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public void saveToProcess(String path){
-        if(itemRepository.existsItemByFilePathVideoLike(path)
-                || Constants.Files.transcribeExtensions.stream().anyMatch(path::contains)
-                || Constants.Files.ignoreExtensions.stream().anyMatch(path::contains)) return;
-        Item item = new Item();
-        item.setFilePathVideo(path);
-        itemRepository.save(item);
+        try {
+            if(itemRepository.existsItemByFilePathVideoLike(path)
+                    || Constants.Files.transcribeExtensions.stream().anyMatch(path::contains)
+                    || Constants.Files.ignoreExtensions.stream().anyMatch(path::contains)) return;
+            Item item = new Item();
+            item.setFilePathVideo(path);
+            itemRepository.save(item);
+        } catch (Exception e){
+            throw new BatchSttException(e.getMessage());
+        }
     }
 
     @Override
