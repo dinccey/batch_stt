@@ -13,4 +13,6 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     void removeAppUserByAdminIsTrue();
 
     void removeAppUserByUsername(String username);
+
+    Optional<AppUser> findByUsernameAndAdminTrue(String username);
 }

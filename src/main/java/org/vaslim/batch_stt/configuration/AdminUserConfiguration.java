@@ -6,6 +6,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import org.vaslim.batch_stt.exception.BatchSttException;
 import org.vaslim.batch_stt.model.AppUser;
 import org.vaslim.batch_stt.repository.AppUserRepository;
 
@@ -40,6 +41,7 @@ public class AdminUserConfiguration {
             appUserRepository.save(appUser);
         } catch (Exception e){
             e.printStackTrace();
+            throw new BatchSttException(e.getMessage());
         }
     }
 }

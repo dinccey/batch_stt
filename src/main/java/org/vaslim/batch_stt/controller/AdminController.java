@@ -16,6 +16,8 @@ import org.vaslim.batch_stt.service.WhisperClientService;
 import org.vaslim.batch_stt.util.JwtUtils;
 
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @CrossOrigin(origins = "${frontend.origin}", maxAge = 3600, allowCredentials = "true")
 @RestController
@@ -26,6 +28,8 @@ public class AdminController {
     private final WhisperClientService whisperClientService;
     private final JwtUtils jwtUtils;
     private final FilteringScheduledTask filteringScheduledTask;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();;
+
 
     private final AdminService adminService;
 
@@ -44,13 +48,11 @@ public class AdminController {
     }
 
     @GetMapping("/run")
-    public ResponseEntity<?> run(final HttpServletRequest httpServletRequest){
+    public ResponseEntity<?> run(final HttpServletRequest httpServletRequest) {
         Cookie cookie = WebUtils.getCookie(httpServletRequest, cookieName);
         String username = jwtUtils.getUserNameFromJwtToken(cookie.getValue());
-        if(username.equals(adminUsername)){
-            whisperClientService.findUnprocessedFiles();
-            whisperClientService.processAllFiles();
-            filteringScheduledTask.run();
+        if (adminService.isUserAdmin(username)) {
+            executor.submit(transcribingScheduledTask::run);
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -62,7 +64,7 @@ public class AdminController {
         assert cookie != null;
         String username = jwtUtils.getUserNameFromJwtToken(cookie.getValue());
 
-        if(username.equals(adminUsername)){
+        if (adminService.isUserAdmin(username)) {
 
             return ResponseEntity.ok(adminService.addUser(appUserDTO));
         }
@@ -75,7 +77,7 @@ public class AdminController {
         assert cookie != null;
         String username = jwtUtils.getUserNameFromJwtToken(cookie.getValue());
 
-        if(username.equals(adminUsername)){
+        if (adminService.isUserAdmin(username)) {
 
             return ResponseEntity.ok(adminService.editUser(appUserDTO));
         }
@@ -83,12 +85,12 @@ public class AdminController {
     }
 
     @GetMapping("/user/remove/{username}")
-    public ResponseEntity<?> removeUser(@PathVariable("username") String user, final HttpServletRequest httpServletRequest){
+    public ResponseEntity<?> removeUser(@PathVariable("username") String user, final HttpServletRequest httpServletRequest) {
         Cookie cookie = WebUtils.getCookie(httpServletRequest, cookieName);
         assert cookie != null;
         String username = jwtUtils.getUserNameFromJwtToken(cookie.getValue());
 
-        if(username.equals(adminUsername)){
+        if (adminService.isUserAdmin(username)) {
             adminService.removeUser(user);
             return ResponseEntity.ok().build();
         }
@@ -96,12 +98,12 @@ public class AdminController {
     }
 
     @GetMapping("user/all")
-    public ResponseEntity<Set<AppUserDTO>> allUsers(final HttpServletRequest httpServletRequest){
+    public ResponseEntity<Set<AppUserDTO>> allUsers(final HttpServletRequest httpServletRequest) {
         Cookie cookie = WebUtils.getCookie(httpServletRequest, cookieName);
         assert cookie != null;
         String username = jwtUtils.getUserNameFromJwtToken(cookie.getValue());
 
-        if(username.equals(adminUsername)){
+        if (adminService.isUserAdmin(username)) {
             return ResponseEntity.ok(adminService.getAllUsers());
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

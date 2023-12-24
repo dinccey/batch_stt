@@ -1,0 +1,23 @@
+version: '3'
+services:
+  batchstt-db:
+    image: 'mysql:8.1'
+    container_name: batchstt-db
+    volumes:
+      - mysql:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD}
+      - MYSQL_USER=${MYSQL_USER}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${MYSQL_DATABASE}
+    restart: always
+    networks:
+      - batchstt_net
+
+volumes:
+  mysql:
+
+#docker network create batchstt_net
+networks:
+  batchstt_net:
+    external: true

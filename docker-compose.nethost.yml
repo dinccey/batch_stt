@@ -4,8 +4,7 @@ services:
     image: 'vaslim/batchstt'
     build:
       dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
+    network_mode: host
     environment:
       - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
       - WHISPER_API_URLS=${WHISPER_API_URLS}
@@ -24,11 +23,5 @@ services:
       - ${VIDEOS_PATH}:/mnt/videos/folder1:rw
       - ${FILTER_FILE_PATH}:/etc/filter.txt:r
     restart: always
-    networks:
-      - batchstt_net
 
-#docker network create batchstt_net
-networks:
-  batchstt_net:
-    external: true
 
