@@ -1,0 +1,28 @@
+version: '3'
+services:
+  app-be:
+    image: 'vaslim/batchstt'
+    build:
+      dockerfile: Dockerfile
+    network_mode: host
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - WHISPER_API_URLS=${WHISPER_API_URLS}
+      - OUTPUT_FORMAT=${OUTPUT_FORMAT}
+      - JOB_CRON=${JOB_CRON}
+      - DATASOURCE_URL=${DATASOURCE_URL}
+      - DATASOURCE_USERNAME=${DATASOURCE_USERNAME}
+      - DATASOURCE_PASSWORD=${DATASOURCE_PASSWORD}
+      - LIQUIBASE_SCHEMA=${LIQUIBASE_SCHEMA}
+      - EXCLUDED_PATHS=${EXCLUDED_PATHS}
+      - FRONTEND_ORIGIN_URL=${FRONTEND_ORIGIN_URL}
+      - SPRING_SECURITY_USERNAME=${SPRING_SECURITY_USERNAME}
+      - SPRING_SECURITY_PASSWORD=${SPRING_SECURITY_PASSWORD}
+      - MP3_SAVE=${MP3_SAVE}
+    volumes:
+      - ${VIDEOS_PATH}:/mnt/videos/folder1:rw
+      - ${FILTER_FILE_PATH}:/etc/filter.txt:r
+    networks:
+      - batchstt_net
+
+
