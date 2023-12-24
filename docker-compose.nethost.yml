@@ -22,5 +22,6 @@ services:
     volumes:
       - ${VIDEOS_PATH}:/mnt/videos/folder1:rw
       - ${FILTER_FILE_PATH}:/etc/filter.txt:r
+    restart: always
 
 
