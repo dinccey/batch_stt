@@ -95,7 +95,7 @@ public class FileServiceImpl implements FileService {
             try (FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(audioFile, 1)) {
                 recorder.setAudioCodec(avcodec.AV_CODEC_ID_MP3);
                 recorder.setAudioQuality(0);
-                recorder.setAudioBitrate(192000);
+                recorder.setAudioBitrate(128000);
                 recorder.setSampleRate(grabber.getSampleRate());
                 recorder.setImageWidth(0);
                 recorder.setImageHeight(0);
