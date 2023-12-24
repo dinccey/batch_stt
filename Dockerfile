@@ -1,4 +1,4 @@
-FROM maven:3.9.4-amazoncorretto-17 AS builder
+FROM maven:3-amazoncorretto-17-debian-bookworm AS builder
 WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline
