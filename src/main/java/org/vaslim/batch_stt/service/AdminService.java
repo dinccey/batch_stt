@@ -15,4 +15,6 @@ public interface AdminService {
     AppUserDTO editUser(AppUserDTO appUserDTO);
 
     Set<AppUserDTO> getAllUsers();
+
+    boolean isUserAdmin(String username);
 }
