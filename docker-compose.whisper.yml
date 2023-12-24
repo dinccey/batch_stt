@@ -1,0 +1,15 @@
+version: '3'
+services:
+  openai-whisper-asr-webservice:
+    image: onerahmet/openai-whisper-asr-webservice:latest
+    environment:
+      ASR_MODEL: ${ASR_MODEL}
+      ASR_ENGINE: ${ASR_ENGINE}
+    ports:
+      - "9000:9000"
+    #networks:
+    #  - batchstt_net
+
+#networks:
+#  batchstt_net:
+#    external: true
