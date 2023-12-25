@@ -17,14 +17,14 @@ Then to build and run (don't forget to customize environment variables in docker
 
 `docker-compose up -d`
 
-This will start the BatchSTT application and Whisper AI ASR Docker container. You can run Whisper container anywhere but only one instance at a time is supported at the moment.
+This will start the BatchSTT application and Whisper AI ASR Docker container. The main backend now supports multiple (virtually unlimited) Whisper instances. They can be added (POST api/v1/instances/add) after logging in with a user on the auth/login endpoint. All reachable (automatically checked) Whisper instances are then added to a connection pool and used for transcription. Before transcription, each video is converted to a 128kbps MP3 file. This process happens on the backend and could cause a bottleneck if a large number of Whisper instances is supported by weak hardware on the main backend.
 
 ## Environment Variables
 
 There is a ```.env``` file available, modify values in it. 
 NOTE: start the db docker-compose if you don't plan on connecting to a existing db.
 
-The following environment variables can be set in the docker-compose.yml (or .env) file:
+The following environment variables (and several others, see .env) can be set in the docker-compose.yml (or .env) file:
 - ```MP3_SAVE```: true or false, (default false) save mp3 of video in the same folder.
 - ```EXCLUDED_PATHS```: Comma separated list of paths that should not be processed
 - ```SPRING_PROFILES_ACTIVE```: The active profile for Spring Boot. Possible values are ```local```, ```dev```, or ```prod```.
@@ -67,6 +67,6 @@ To import all endpoints with sample JSON, use OpenAPI on `/v3/api-docs`
 ## Filtering (optional)
 For post-processing of transcriptions, prepare a text file with key:value pairs where key is original word and value is replacement word. Example file is in the project.
 Before saving filtered transcriptions, a backup is saved with the hash of its filter.
-When the filter file is changed in any way, all filtering will be re-done.
+When the filter file is changed in any way, all filtering will be re-done. To disable filtering, put a wrong path (for now)
 
 This software is provided as-is. There may be bugs and so on.
