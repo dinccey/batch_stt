@@ -9,6 +9,10 @@ public class StatisticsDTO {
     private Integer pendingItemsTotal;
 
     private Integer processedItemsTotal;
+
+    private Integer currentlyOnlineWorkersCount;
+
+    private Integer currentlyActiveWorkersCount;
     Set<InferenceInstanceDTO> inferenceInstances;
 
     public Integer getItemsProcessed() {
@@ -41,5 +45,21 @@ public class StatisticsDTO {
 
     public void setInferenceInstances(Set<InferenceInstanceDTO> inferenceInstances) {
         this.inferenceInstances = inferenceInstances;
+    }
+
+    public Integer getCurrentlyOnlineWorkersCount() {
+        return currentlyOnlineWorkersCount;
+    }
+
+    public void setCurrentlyOnlineWorkersCount(Integer currentlyOnlineWorkersCount) {
+        this.currentlyOnlineWorkersCount = currentlyOnlineWorkersCount;
+    }
+
+    public Integer getCurrentlyActiveWorkersCount() {
+        return currentlyActiveWorkersCount;
+    }
+
+    public void setCurrentlyActiveWorkersCount(Integer currentlyActiveWorkersCount) {
+        this.currentlyActiveWorkersCount = currentlyActiveWorkersCount;
     }
 }

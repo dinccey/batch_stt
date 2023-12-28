@@ -6,6 +6,7 @@ import org.vaslim.batch_stt.dto.InferenceInstanceDTO;
 import org.vaslim.batch_stt.dto.StatisticsDTO;
 import org.vaslim.batch_stt.model.AppUser;
 import org.vaslim.batch_stt.model.InferenceInstance;
+import org.vaslim.batch_stt.pool.ConnectionPool;
 import org.vaslim.batch_stt.repository.AppUserRepository;
 import org.vaslim.batch_stt.repository.InferenceInstanceRepository;
 import org.vaslim.batch_stt.repository.ItemRepository;
@@ -25,11 +26,14 @@ public class StatisticsServiceImpl implements StatisticsService {
 
     private final ModelMapper modelMapper;
 
-    public StatisticsServiceImpl(InferenceInstanceRepository inferenceInstanceRepository, AppUserRepository appUserRepository, ItemRepository itemRepository, ModelMapper modelMapper) {
+    private final ConnectionPool connectionPool;
+
+    public StatisticsServiceImpl(InferenceInstanceRepository inferenceInstanceRepository, AppUserRepository appUserRepository, ItemRepository itemRepository, ModelMapper modelMapper, ConnectionPool connectionPool) {
         this.inferenceInstanceRepository = inferenceInstanceRepository;
         this.appUserRepository = appUserRepository;
         this.itemRepository = itemRepository;
         this.modelMapper = modelMapper;
+        this.connectionPool = connectionPool;
     }
 
     @Override
@@ -37,11 +41,13 @@ public class StatisticsServiceImpl implements StatisticsService {
         AppUser appUser = appUserRepository.findByUsername(username).orElse(null);
         Set<InferenceInstanceDTO> inferenceInstanceDTOSet = inferenceInstanceRepository.findAllByAppUser(appUser).stream().map(inferenceInstance ->
                 modelMapper.map(inferenceInstance, InferenceInstanceDTO.class)).collect(Collectors.toSet());
-        Integer unprocessedItemsCount = itemRepository.countItemByFilePathTextIsNull();
 
         StatisticsDTO statisticsDTO = new StatisticsDTO();
         statisticsDTO.setInferenceInstances(inferenceInstanceDTOSet);
-        statisticsDTO.setPendingItemsTotal(unprocessedItemsCount);
+        statisticsDTO.setPendingItemsTotal(itemRepository.countItemByFilePathTextIsNull());
+        statisticsDTO.setProcessedItemsTotal(itemRepository.countItemByFilePathTextIsNotNull());
+        statisticsDTO.setCurrentlyOnlineWorkersCount(connectionPool.getOnlineConnectionsCount());
+        statisticsDTO.setCurrentlyActiveWorkersCount(connectionPool.getCurrentlyProcessingCount());
         assert appUser != null;
         statisticsDTO.setItemsProcessed(appUser.getItemsProcessed());
 
