@@ -1,10 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
         xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
         xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet author="vaslim" id="20231228-1">
 
-    <include file="changelog/20230901_1_initial_script.xml" relativeToChangelogFile="true" ignore="false"/>
-    <include file="changelog/20231228_1_add_failed_stats.xml" relativeToChangelogFile="true" ignore="false"/>
+        <addColumn tableName="inference_instance">
+            <column name="failed_runs_count"
+                    type="int" defaultValue="0"/>
+        </addColumn>
 
+    </changeSet>
 </databaseChangeLog>

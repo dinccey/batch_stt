@@ -18,6 +18,8 @@ public class ConnectionPool {
 
     private final InferenceInstanceRepository inferenceInstanceRepository;
 
+    private int availableConnectionsCount;
+
     @Autowired
     public ConnectionPool(@Value("${whisper.api.urls}") String[] apiUrls, InferenceInstanceRepository inferenceInstanceRepository) {
         this.inferenceInstanceRepository = inferenceInstanceRepository;
@@ -31,11 +33,13 @@ public class ConnectionPool {
 
     public synchronized void refreshUrlsFromDatabase() {
         Set<InferenceInstance> inferenceInstanceSet = inferenceInstanceRepository.findAllByAvailableIsTrue();
+        connections.clear();
         inferenceInstanceSet.forEach(inferenceInstance -> {
             ApiClient apiClient = new ApiClient();
             apiClient.setBasePath(inferenceInstance.getInstanceUrl());
             connections.put(inferenceInstance.getInstanceUrl(), new EndpointsApi(apiClient));
         });
+        availableConnectionsCount = inferenceInstanceSet.size();
     }
 
     public synchronized EndpointsApi getConnection() {
@@ -58,5 +62,13 @@ public class ConnectionPool {
 
     public synchronized void removeConnection(String url) {
         connections.remove(url);
+    }
+
+    public int getOnlineConnectionsCount() {
+        return availableConnectionsCount;
+    }
+
+    public int getCurrentlyProcessingCount(){
+        return availableConnectionsCount - connections.size();
     }
 }

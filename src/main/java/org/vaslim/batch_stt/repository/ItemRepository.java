@@ -21,4 +21,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findByTextFilterHashNotLikeOrTextFilterHashIsNull(String filterMapHash);
 
     Integer countItemByFilePathTextIsNull();
+
+    Integer countItemByFilePathTextIsNotNull();
 }

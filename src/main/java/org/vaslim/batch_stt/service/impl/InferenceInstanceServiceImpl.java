@@ -37,7 +37,7 @@ public class InferenceInstanceServiceImpl implements InferenceInstanceService {
         AppUser appUser = appUserRepository.findByUsername(username).orElseThrow(()-> new BatchSttException("User not found"));
         inferenceInstance.setAppUser(appUser);
         inferenceInstance.setItemsProcessed(0);
-
+        inferenceInstance.setFailedRunsCount(0);
         return modelMapper.map(inferenceInstanceRepository.save(inferenceInstance), InferenceInstanceDTO.class);
     }
 
@@ -86,6 +86,7 @@ public class InferenceInstanceServiceImpl implements InferenceInstanceService {
             URL url = new URL(basePath+"/docs");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
+            connection.setConnectTimeout(2000);
             int responseCode = connection.getResponseCode();
             return (responseCode == HttpURLConnection.HTTP_OK);
         } catch (IOException e) {
