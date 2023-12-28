@@ -12,6 +12,7 @@ public class InferenceInstanceDTO {
     private Boolean available;
 
     private Integer itemsProcessed;
+    private Integer failedRunsCount;
 
     public Integer getItemsProcessed() {
         return itemsProcessed;
@@ -43,5 +44,13 @@ public class InferenceInstanceDTO {
 
     public void setAvailable(Boolean available) {
         this.available = available;
+    }
+
+    public Integer getFailedRunsCount() {
+        return failedRunsCount;
+    }
+
+    public void setFailedRunsCount(Integer failedRunsCount) {
+        this.failedRunsCount = failedRunsCount;
     }
 }

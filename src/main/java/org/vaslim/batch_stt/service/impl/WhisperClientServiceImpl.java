@@ -71,12 +71,13 @@ public class WhisperClientServiceImpl implements WhisperClientService {
                             fileService.saveAsProcessed(videoPath , outputFileNamePath);
                             statisticsService.incrementProcessedItemsPerInstance(endpointsApi[0].getApiClient().getBasePath());
                         }
-                    } catch (IOException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                         updateItemStatus(videoFile, ProcessingStatus.PENDING);
                         InferenceInstance inferenceInstance = inferenceInstanceRepository.findByInstanceUrl(endpointsApi[0].getApiClient().getBasePath()).orElse(null);
                         assert inferenceInstance != null;
                         inferenceInstance.setAvailable(false);
+                        inferenceInstance.setFailedRunsCount(inferenceInstance.getFailedRunsCount() + 1);
                         inferenceInstanceRepository.save(inferenceInstance);
 
                     } finally {

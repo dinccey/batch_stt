@@ -21,6 +21,9 @@ public class InferenceInstance {
     @Column
     private Integer itemsProcessed = 0;
 
+    @Column
+    private Integer failedRunsCount = 0;
+
     @ManyToOne
     @JoinColumn(name="appUser", nullable=false)
     private AppUser appUser;
@@ -63,5 +66,13 @@ public class InferenceInstance {
 
     public void setItemsProcessed(Integer itemsProcessed) {
         this.itemsProcessed = itemsProcessed;
+    }
+
+    public Integer getFailedRunsCount() {
+        return failedRunsCount;
+    }
+
+    public void setFailedRunsCount(Integer failedRunsCount) {
+        this.failedRunsCount = failedRunsCount;
     }
 }
