@@ -52,7 +52,7 @@ public class AdminController {
         Cookie cookie = WebUtils.getCookie(httpServletRequest, cookieName);
         String username = jwtUtils.getUserNameFromJwtToken(cookie.getValue());
         if (adminService.isUserAdmin(username)) {
-            executor.submit(transcribingScheduledTask::run);
+            executor.submit(transcribingScheduledTask::runRefreshFiles);
             return ResponseEntity.ok().build();
         }
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();

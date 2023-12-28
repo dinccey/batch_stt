@@ -16,7 +16,13 @@ public class ApplicationConfiguration {
     }
 
     @Bean
-    public ReentrantLock transcribingTaskReentrantLock(){
+    public ReentrantLock fileRefreshTaskReentrantLock(){
         return new ReentrantLock();
     }
+    @Bean
+    public ReentrantLock fileProcessingTaskReentrantLock(){
+        return new ReentrantLock();
+    }
+
+
 }

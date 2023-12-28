@@ -12,21 +12,35 @@ import java.util.concurrent.locks.ReentrantLock;
 public class TranscribingScheduledTask {
     private final WhisperClientService whisperClientService;
 
-    private final ReentrantLock transcribingTaskReentrantLock;
+    private final ReentrantLock fileRefreshTaskReentrantLock;
 
-    public TranscribingScheduledTask(WhisperClientService whisperClientService, ReentrantLock transcribingTaskReentrantLock) {
+    private final ReentrantLock fileProcessingTaskReentrantLock;
+
+    public TranscribingScheduledTask(WhisperClientService whisperClientService, ReentrantLock fileRefreshTaskReentrantLock, ReentrantLock fileProcessingTaskReentrantLock) {
         this.whisperClientService = whisperClientService;
-        this.transcribingTaskReentrantLock = transcribingTaskReentrantLock;
+        this.fileRefreshTaskReentrantLock = fileRefreshTaskReentrantLock;
+        this.fileProcessingTaskReentrantLock = fileProcessingTaskReentrantLock;
     }
 
     @Scheduled(cron = "${job.cron}")
-    public void run() {
-        if(transcribingTaskReentrantLock.tryLock()){
+    public void runRefreshFiles() {
+        if(fileRefreshTaskReentrantLock.tryLock()){
             try {
                 whisperClientService.findUnprocessedFiles();
+            } finally {
+                fileRefreshTaskReentrantLock.unlock();
+            }
+        }
+
+    }
+
+    @Scheduled(cron = "*/10 * * * * *")
+    public void runProcessing(){
+        if(fileProcessingTaskReentrantLock.tryLock()){
+            try {
                 whisperClientService.processAllFiles();
             } finally {
-                transcribingTaskReentrantLock.unlock();
+                fileProcessingTaskReentrantLock.unlock();
             }
         }
 
