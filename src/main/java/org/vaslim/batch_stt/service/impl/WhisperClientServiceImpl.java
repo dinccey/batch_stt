@@ -13,7 +13,7 @@ import org.vaslim.batch_stt.service.StatisticsService;
 import org.vaslim.batch_stt.service.WhisperClientService;
 import org.vaslim.whisper_asr.client.api.EndpointsApi;
 
-import java.io.*;
+import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -54,7 +54,7 @@ public class WhisperClientServiceImpl implements WhisperClientService {
             String videoPath = item.getFilePathVideo();
             File videoFile = new File(videoPath);
             updateItemStatus(videoFile, ProcessingStatus.IN_PROGRESS);
-
+            System.out.println("STARTED processing");
             final EndpointsApi[] endpointsApi = new EndpointsApi[1];
             while (endpointsApi[0] == null){
                 endpointsApi[0] = connectionPool.getConnection();
@@ -62,6 +62,7 @@ public class WhisperClientServiceImpl implements WhisperClientService {
             }
             new Thread(() -> {
                 try {
+                    System.out.println("currently: " + videoFile.getName() + " on "+ endpointsApi[0]);
                     String outputFileNamePath = videoFile.getAbsolutePath().substring(0,videoFile.getAbsolutePath().lastIndexOf(".")) + "." + outputFormat;
                     File audioFile = fileService.extractAudio(videoFile);
 

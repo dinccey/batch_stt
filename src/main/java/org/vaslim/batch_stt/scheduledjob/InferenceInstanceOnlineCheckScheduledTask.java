@@ -33,7 +33,7 @@ public class InferenceInstanceOnlineCheckScheduledTask {
 
     @Scheduled(cron = "*/10 * * * * *")
     public void runRefreshConnectionPool() {
-        connectionPool.refreshUrlsFromDatabase();
+        //connectionPool.refreshUrlsFromDatabase();
     }
 
 }

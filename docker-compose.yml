@@ -27,6 +27,7 @@ services:
     networks:
       - batchstt_net
 
+#sudo docker network create --opt com.docker.network.driver.mtu=1420 --driver bridge batchstt_net
 #docker network create batchstt_net
 networks:
   batchstt_net:
