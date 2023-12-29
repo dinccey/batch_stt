@@ -62,7 +62,7 @@ public class WhisperClientServiceImpl implements WhisperClientService {
             }
             new Thread(() -> {
                 try {
-                    System.out.println("currently: " + videoFile.getName() + " on "+ endpointsApi[0]);
+                    System.out.println("currently: " + videoFile.getAbsolutePath() + " on "+ endpointsApi[0].getApiClient());
                     String outputFileNamePath = videoFile.getAbsolutePath().substring(0,videoFile.getAbsolutePath().lastIndexOf(".")) + "." + outputFormat;
                     File audioFile = fileService.extractAudio(videoFile);
 

@@ -15,6 +15,7 @@ import java.util.Set;
 @Component
 public class ConnectionPool {
     private final Map<String, EndpointsApi> connections = new HashMap<>();
+    private final Map<String, EndpointsApi> connectionsActive = new HashMap<>();
 
     private final InferenceInstanceRepository inferenceInstanceRepository;
 
@@ -37,7 +38,9 @@ public class ConnectionPool {
         inferenceInstanceSet.forEach(inferenceInstance -> {
             ApiClient apiClient = new ApiClient();
             apiClient.setBasePath(inferenceInstance.getInstanceUrl());
-            connections.put(inferenceInstance.getInstanceUrl(), new EndpointsApi(apiClient));
+            if(!connectionsActive.containsKey(inferenceInstance.getInstanceUrl())){
+                connections.put(inferenceInstance.getInstanceUrl(), new EndpointsApi(apiClient));
+            }
         });
         availableConnectionsCount = inferenceInstanceSet.size();
     }
@@ -46,6 +49,7 @@ public class ConnectionPool {
         EndpointsApi endpointsApi = connections.values().stream().findFirst().orElse(null);
         if(endpointsApi != null){
             connections.remove(endpointsApi.getApiClient().getBasePath());
+            connectionsActive.put(endpointsApi.getApiClient().getBasePath(), endpointsApi);
         }
         return endpointsApi;
     }
@@ -54,6 +58,7 @@ public class ConnectionPool {
         ApiClient apiClient = new ApiClient();
         apiClient.setBasePath(url);
         connections.put(url, new EndpointsApi(apiClient));
+        connectionsActive.remove(url);
     }
 
     public synchronized void addConnection(EndpointsApi endpointsApi) {
@@ -69,6 +74,6 @@ public class ConnectionPool {
     }
 
     public int getCurrentlyProcessingCount(){
-        return availableConnectionsCount - connections.size();
+        return connectionsActive.size();
     }
 }
