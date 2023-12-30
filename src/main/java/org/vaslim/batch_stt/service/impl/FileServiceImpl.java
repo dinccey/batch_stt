@@ -56,6 +56,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public void findUnprocessedFiles(Path path) {
         try (Stream<Path> paths = Files.walk(path)) {
+            deleteExcludedItemsFromDb(excludedPaths);
             List<Path> fileList = paths.filter(Files::isRegularFile).toList();
             Set<String> filePaths = new HashSet<>();
             for (Path filePath : fileList) {
@@ -144,6 +145,12 @@ public class FileServiceImpl implements FileService {
             } catch (Exception e){
 
             }
+        }
+    }
+
+    public void deleteExcludedItemsFromDb(String[] excludedPaths){
+        for (String path: excludedPaths){
+            itemRepository.deleteItemByFilePathVideoStartingWith(path);
         }
     }
 

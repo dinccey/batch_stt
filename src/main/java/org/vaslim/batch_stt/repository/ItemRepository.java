@@ -1,5 +1,6 @@
 package org.vaslim.batch_stt.repository;
 
+import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import org.vaslim.batch_stt.model.Item;
@@ -23,4 +24,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     Integer countItemByFilePathTextIsNull();
 
     Integer countItemByFilePathTextIsNotNull();
+
+    @Transactional
+    void deleteItemByFilePathVideoStartingWith(String excludedPath);
 }
