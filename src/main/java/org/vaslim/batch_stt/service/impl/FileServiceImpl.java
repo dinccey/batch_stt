@@ -150,6 +150,7 @@ public class FileServiceImpl implements FileService {
 
     public void deleteExcludedItemsFromDb(String[] excludedPaths){
         for (String path: excludedPaths){
+            System.out.println("Excluded path: " + path);
             itemRepository.deleteItemByFilePathVideoStartingWith(path);
         }
     }
