@@ -47,7 +47,7 @@ public class ConnectionPool {
                 }
             }
         });
-        availableConnectionsCount = connections.size();
+        availableConnectionsCount = inferenceInstanceSet.stream().filter(InferenceInstance::getAvailable).toList().size();
     }
 
     public synchronized EndpointsApi getConnection() {
