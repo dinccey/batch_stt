@@ -83,14 +83,14 @@ public class WhisperClientServiceImpl implements WhisperClientService {
                         logger.warn("Inference failed with exception: " + e.getMessage());
                         updateItemStatus(videoFile, ProcessingStatus.PENDING);
                         updateInferenceInstanceOnFailure(endpointsApi);
-                        //connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
+                        connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
 
                     }
                 } catch (Exception e) {
                     logger.warn("Inference failed with exception: " + e.getMessage());
                     updateItemStatus(videoFile, ProcessingStatus.PENDING);
                     updateInferenceInstanceOnFailure(endpointsApi);
-                    //connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
+                    connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
                 }
             }).start();
 
