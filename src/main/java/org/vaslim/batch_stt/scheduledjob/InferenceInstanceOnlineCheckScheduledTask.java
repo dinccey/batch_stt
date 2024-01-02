@@ -31,8 +31,13 @@ public class InferenceInstanceOnlineCheckScheduledTask {
     public void run() {
         logger.info("online check.");
         inferenceInstanceRepository.findAll().forEach(inferenceInstance -> {
-            inferenceInstance.setAvailable(inferenceInstanceService.checkIsReachable(inferenceInstance.getInstanceUrl()));
+            boolean valueBefore = inferenceInstance.getAvailable();
+            boolean valueAfter = inferenceInstanceService.checkIsReachable(inferenceInstance.getInstanceUrl());
+            inferenceInstance.setAvailable(valueAfter);
             inferenceInstanceRepository.save(inferenceInstance);
+            if(valueAfter != valueBefore){
+                logger.warn(inferenceInstance.getInstanceUrl() + "'s online status went from " + valueBefore + " to " + valueAfter);
+            }
         });
     }
 

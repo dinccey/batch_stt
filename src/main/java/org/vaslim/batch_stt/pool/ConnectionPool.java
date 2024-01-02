@@ -9,8 +9,8 @@ import org.vaslim.whisper_asr.client.api.EndpointsApi;
 import org.vaslim.whisper_asr.invoker.ApiClient;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Component
 public class ConnectionPool {
@@ -33,19 +33,21 @@ public class ConnectionPool {
     }
 
     public synchronized void refreshUrlsFromDatabase() {
-        Set<InferenceInstance> inferenceInstanceSet = inferenceInstanceRepository.findAllByAvailableIsTrue();
+        List<InferenceInstance> inferenceInstanceSet = inferenceInstanceRepository.findAll();
         connections.clear();
         inferenceInstanceSet.forEach(inferenceInstance -> {
-            ApiClient apiClient = new ApiClient();
-            apiClient.setBasePath(inferenceInstance.getInstanceUrl());
-            if(connectionsActive.containsKey(inferenceInstance.getInstanceUrl()) && !inferenceInstance.getAvailable()){
-                connectionsActive.remove(inferenceInstance.getInstanceUrl());
-            }
-            if(!connectionsActive.containsKey(inferenceInstance.getInstanceUrl())){
-                connections.put(inferenceInstance.getInstanceUrl(), new EndpointsApi(apiClient));
+            if (inferenceInstance.getAvailable()){
+                ApiClient apiClient = new ApiClient();
+                apiClient.setBasePath(inferenceInstance.getInstanceUrl());
+                if(connectionsActive.containsKey(inferenceInstance.getInstanceUrl()) && !inferenceInstance.getAvailable()){
+                    connectionsActive.remove(inferenceInstance.getInstanceUrl());
+                }
+                if(!connectionsActive.containsKey(inferenceInstance.getInstanceUrl())){
+                    connections.put(inferenceInstance.getInstanceUrl(), new EndpointsApi(apiClient));
+                }
             }
         });
-        availableConnectionsCount = inferenceInstanceSet.size();
+        availableConnectionsCount = connections.size();
     }
 
     public synchronized EndpointsApi getConnection() {
