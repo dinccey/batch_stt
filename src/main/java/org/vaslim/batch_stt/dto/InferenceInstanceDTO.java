@@ -13,6 +13,7 @@ public class InferenceInstanceDTO {
 
     private Integer itemsProcessed;
     private Integer failedRunsCount;
+    private Long totalProcessingTimeSeconds;
 
     public Integer getItemsProcessed() {
         return itemsProcessed;
@@ -52,5 +53,13 @@ public class InferenceInstanceDTO {
 
     public void setFailedRunsCount(Integer failedRunsCount) {
         this.failedRunsCount = failedRunsCount;
+    }
+
+    public Long getTotalProcessingTimeSeconds() {
+        return totalProcessingTimeSeconds;
+    }
+
+    public void setTotalProcessingTimeSeconds(Long totalProcessingTimeSeconds) {
+        this.totalProcessingTimeSeconds = totalProcessingTimeSeconds;
     }
 }
