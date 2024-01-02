@@ -1,15 +1,15 @@
 package org.vaslim.batch_stt.scheduledjob;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 import org.vaslim.batch_stt.service.TextFilteringService;
 
 import java.util.Map;
 import java.util.Optional;
 
-@Component
+@Configuration
 @EnableScheduling
 public class FilteringScheduledTask {
     private final TextFilteringService textFilteringService;

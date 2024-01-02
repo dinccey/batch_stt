@@ -1,13 +1,13 @@
 package org.vaslim.batch_stt.scheduledjob;
 
+import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 import org.vaslim.batch_stt.service.WhisperClientService;
 
 import java.util.concurrent.locks.ReentrantLock;
 
-@Component
+@Configuration
 @EnableScheduling
 public class TranscribingScheduledTask {
     private final WhisperClientService whisperClientService;

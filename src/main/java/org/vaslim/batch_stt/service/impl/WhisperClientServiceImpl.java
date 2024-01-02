@@ -54,11 +54,11 @@ public class WhisperClientServiceImpl implements WhisperClientService {
     @Override
     public void processAllFiles() {
         List<Item> unprocessedItems = itemRepository.findAllByFilePathTextIsNullOrProcessingStatus(ProcessingStatus.PENDING);
+        logger.info("STARTED processing loop, unprocessedItems size: " + unprocessedItems.size());
         unprocessedItems.forEach(item -> {
             String videoPath = item.getFilePathVideo();
             File videoFile = new File(videoPath);
             updateItemStatus(videoFile, ProcessingStatus.IN_PROGRESS);
-            System.out.println("STARTED processing");
             final EndpointsApi[] endpointsApi = new EndpointsApi[1];
             while (endpointsApi[0] == null){
                 endpointsApi[0] = connectionPool.getConnection();
@@ -66,7 +66,6 @@ public class WhisperClientServiceImpl implements WhisperClientService {
             }
             new Thread(() -> {
                 try {
-                    System.out.println("currently: " + videoFile.getAbsolutePath() + " on "+ endpointsApi[0].getApiClient());
                     String outputFileNamePath = videoFile.getAbsolutePath().substring(0,videoFile.getAbsolutePath().lastIndexOf(".")) + "." + outputFormat;
                     File audioFile = fileService.extractAudio(videoFile);
                     long startTime = System.currentTimeMillis();

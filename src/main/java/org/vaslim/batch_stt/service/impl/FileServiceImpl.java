@@ -3,6 +3,8 @@ package org.vaslim.batch_stt.service.impl;
 import org.bytedeco.ffmpeg.global.avcodec;
 import org.bytedeco.javacv.FFmpegFrameGrabber;
 import org.bytedeco.javacv.FFmpegFrameRecorder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.vaslim.batch_stt.constants.Constants;
@@ -27,6 +29,8 @@ public class FileServiceImpl implements FileService {
 
     private static final String TASK_TRANSCRIBE = "transcribe";
 
+    private static final Logger logger = LoggerFactory.getLogger(FileServiceImpl.class);
+
     private final ItemRepository itemRepository;
 
     @Value("${output.format}")
@@ -45,6 +49,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public File processFile(File file, String outputFilePathName, EndpointsApi endpointsApi) throws IOException {
 
+        logger.info("Starting inference on " + endpointsApi.getApiClient().getBasePath() + " " + file.getName());
         byte[] fileContent = endpointsApi.asrAsrPost(file, TASK_TRANSCRIBE,"","", true, outputFormat);
         FileOutputStream fos = new FileOutputStream(outputFilePathName);
         fos.write(fileContent);
