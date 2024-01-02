@@ -3,7 +3,6 @@ package org.vaslim.batch_stt.repository;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import org.vaslim.batch_stt.enums.ProcessingStatus;
 import org.vaslim.batch_stt.model.Item;
 
 import java.time.LocalDateTime;
@@ -14,7 +13,7 @@ import java.util.Optional;
 public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findAllByProcessedTimestampBetween(LocalDateTime start, LocalDateTime end);
 
-    List<Item> findAllByFilePathTextIsNullOrProcessingStatus(ProcessingStatus processingStatus);
+    List<Item> findAllByFilePathTextIsNull();
 
     boolean existsItemByFilePathVideoLike(String filePathVideo);
 

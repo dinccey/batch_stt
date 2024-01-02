@@ -69,6 +69,7 @@ public class AppUser {
     }
 
     public Long getTotalProcessingTimeSeconds() {
+        if(totalProcessingTimeSeconds == null) return 0L;
         return totalProcessingTimeSeconds;
     }
 

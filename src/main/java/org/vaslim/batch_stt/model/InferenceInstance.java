@@ -25,7 +25,7 @@ public class InferenceInstance {
     private Integer failedRunsCount = 0;
 
     @Column
-    private Long totalProcessingTimeSeconds;
+    private Long totalProcessingTimeSeconds = 0L;
 
     @ManyToOne
     @JoinColumn(name="appUser", nullable=false)
@@ -80,6 +80,7 @@ public class InferenceInstance {
     }
 
     public Long getTotalProcessingTimeSeconds() {
+        if(totalProcessingTimeSeconds == null) return 0L;
         return totalProcessingTimeSeconds;
     }
 
