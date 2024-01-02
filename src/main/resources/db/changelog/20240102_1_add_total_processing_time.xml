@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+    <changeSet author="vaslim" id="20240102-1">
+
+        <addColumn tableName="inference_instance">
+            <column name="total_processing_time_seconds"
+                    type="bigint" defaultValue="0"/>
+        </addColumn>
+
+        <addColumn tableName="app_user">
+            <column name="total_processing_time_seconds"
+                    type="bigint" defaultValue="0"/>
+        </addColumn>
+
+    </changeSet>
+</databaseChangeLog>

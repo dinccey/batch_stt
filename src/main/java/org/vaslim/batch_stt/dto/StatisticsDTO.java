@@ -10,6 +10,8 @@ public class StatisticsDTO {
 
     private Integer processedItemsTotal;
 
+    private Long totalProcessingTimeSeconds;
+
     private Integer currentlyOnlineWorkersCount;
 
     private Integer currentlyActiveWorkersCount;
@@ -61,5 +63,13 @@ public class StatisticsDTO {
 
     public void setCurrentlyActiveWorkersCount(Integer currentlyActiveWorkersCount) {
         this.currentlyActiveWorkersCount = currentlyActiveWorkersCount;
+    }
+
+    public Long getTotalProcessingTimeSeconds() {
+        return totalProcessingTimeSeconds;
+    }
+
+    public void setTotalProcessingTimeSeconds(Long totalProcessingTimeSeconds) {
+        this.totalProcessingTimeSeconds = totalProcessingTimeSeconds;
     }
 }

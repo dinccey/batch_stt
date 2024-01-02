@@ -21,6 +21,10 @@ public class AppUser {
     @Column
     private Integer itemsProcessed = 0;
 
+    @Column
+    private Long totalProcessingTimeSeconds = 0L;
+
+
     @OneToMany(mappedBy="appUser", cascade = CascadeType.ALL)
     private Set<InferenceInstance> inferenceInstances;
 
@@ -62,5 +66,13 @@ public class AppUser {
 
     public void setAdmin(boolean admin) {
         this.admin = admin;
+    }
+
+    public Long getTotalProcessingTimeSeconds() {
+        return totalProcessingTimeSeconds;
+    }
+
+    public void setTotalProcessingTimeSeconds(Long totalProcessingTimeSeconds) {
+        this.totalProcessingTimeSeconds = totalProcessingTimeSeconds;
     }
 }

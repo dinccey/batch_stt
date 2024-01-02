@@ -6,5 +6,6 @@
 
     <include file="changelog/20230901_1_initial_script.xml" relativeToChangelogFile="true" ignore="false"/>
     <include file="changelog/20231228_1_add_failed_stats.xml" relativeToChangelogFile="true" ignore="false"/>
+    <include file="changelog/20240102_1_add_total_processing_time.xml" relativeToChangelogFile="true" ignore="false"/>
 
 </databaseChangeLog>

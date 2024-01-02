@@ -65,33 +65,39 @@ public class WhisperClientServiceImpl implements WhisperClientService {
                     System.out.println("currently: " + videoFile.getAbsolutePath() + " on "+ endpointsApi[0].getApiClient());
                     String outputFileNamePath = videoFile.getAbsolutePath().substring(0,videoFile.getAbsolutePath().lastIndexOf(".")) + "." + outputFormat;
                     File audioFile = fileService.extractAudio(videoFile);
-
+                    long startTime = System.currentTimeMillis();
+                    long endTime;
                     try {
                         fileService.processFile(audioFile, outputFileNamePath, endpointsApi[0]);
+                        endTime = System.currentTimeMillis();
                         if (new File(outputFileNamePath).exists()){
                             fileService.saveAsProcessed(videoPath , outputFileNamePath);
                             statisticsService.incrementProcessedItemsPerInstance(endpointsApi[0].getApiClient().getBasePath());
+                            statisticsService.incrementTotalProcessingTimePerInstance(endpointsApi[0].getApiClient().getBasePath(),endTime - startTime);
                         }
+                        connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
                     } catch (Exception e) {
                         e.printStackTrace();
                         updateItemStatus(videoFile, ProcessingStatus.PENDING);
-                        InferenceInstance inferenceInstance = inferenceInstanceRepository.findByInstanceUrl(endpointsApi[0].getApiClient().getBasePath()).orElse(null);
-                        assert inferenceInstance != null;
-                        inferenceInstance.setAvailable(false);
-                        inferenceInstance.setFailedRunsCount(inferenceInstance.getFailedRunsCount() + 1);
-                        inferenceInstanceRepository.save(inferenceInstance);
+                        disableInferenceInstanceOnFailure(endpointsApi);
 
-                    } finally {
-                        connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                     updateItemStatus(videoFile, ProcessingStatus.PENDING);
-                    connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
+                    disableInferenceInstanceOnFailure(endpointsApi);
                 }
             }).start();
 
         });
+    }
+
+    private void disableInferenceInstanceOnFailure(EndpointsApi[] endpointsApi) {
+        InferenceInstance inferenceInstance = inferenceInstanceRepository.findByInstanceUrl(endpointsApi[0].getApiClient().getBasePath()).orElse(null);
+        assert inferenceInstance != null;
+        inferenceInstance.setAvailable(false);
+        inferenceInstance.setFailedRunsCount(inferenceInstance.getFailedRunsCount() + 1);
+        inferenceInstanceRepository.save(inferenceInstance);
     }
 
     private void updateItemStatus(File videoFile, ProcessingStatus processingStatus) {

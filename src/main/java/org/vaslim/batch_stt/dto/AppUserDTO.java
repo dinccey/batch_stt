@@ -9,6 +9,8 @@ public class AppUserDTO {
 
     private Integer itemsProcessed = 0;
 
+    private Long totalProcessingTimeSeconds;
+
     public void setUsername(String username) {
         this.username = username;
     }
@@ -39,5 +41,13 @@ public class AppUserDTO {
 
     public Integer getItemsProcessed() {
         return itemsProcessed;
+    }
+
+    public Long getTotalProcessingTimeSeconds() {
+        return totalProcessingTimeSeconds;
+    }
+
+    public void setTotalProcessingTimeSeconds(Long totalProcessingTimeSeconds) {
+        this.totalProcessingTimeSeconds = totalProcessingTimeSeconds;
     }
 }

@@ -8,4 +8,6 @@ public interface StatisticsService {
     StatisticsDTO getUserStatistics(String username);
 
     void incrementProcessedItemsPerInstance(String inferenceInstanceUrl);
+
+    void incrementTotalProcessingTimePerInstance(String inferenceInstance, long timeMillis);
 }
