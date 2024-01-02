@@ -25,10 +25,10 @@ public class InferenceInstanceOnlineCheckScheduledTask {
 
     @Scheduled(cron = "*/1 * * * * *")
     public void run() {
-        inferenceInstanceRepository.findAll().forEach(inferenceInstance -> {
-            inferenceInstance.setAvailable(inferenceInstanceService.checkIsReachable(inferenceInstance.getInstanceUrl()));
-            inferenceInstanceRepository.save(inferenceInstance);
-        });
+//        inferenceInstanceRepository.findAll().forEach(inferenceInstance -> {
+//            inferenceInstance.setAvailable(inferenceInstanceService.checkIsReachable(inferenceInstance.getInstanceUrl()));
+//            inferenceInstanceRepository.save(inferenceInstance);
+//        });
     }
 
     @Scheduled(cron = "*/10 * * * * *")

@@ -80,12 +80,14 @@ public class WhisperClientServiceImpl implements WhisperClientService {
                         e.printStackTrace();
                         updateItemStatus(videoFile, ProcessingStatus.PENDING);
                         disableInferenceInstanceOnFailure(endpointsApi);
+                        connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
 
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                     updateItemStatus(videoFile, ProcessingStatus.PENDING);
                     disableInferenceInstanceOnFailure(endpointsApi);
+                    connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
                 }
             }).start();
 
@@ -95,7 +97,7 @@ public class WhisperClientServiceImpl implements WhisperClientService {
     private void disableInferenceInstanceOnFailure(EndpointsApi[] endpointsApi) {
         InferenceInstance inferenceInstance = inferenceInstanceRepository.findByInstanceUrl(endpointsApi[0].getApiClient().getBasePath()).orElse(null);
         assert inferenceInstance != null;
-        inferenceInstance.setAvailable(false);
+        //inferenceInstance.setAvailable(false);
         inferenceInstance.setFailedRunsCount(inferenceInstance.getFailedRunsCount() + 1);
         inferenceInstanceRepository.save(inferenceInstance);
     }
