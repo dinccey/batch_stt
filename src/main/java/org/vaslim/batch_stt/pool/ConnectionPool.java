@@ -46,6 +46,7 @@ public class ConnectionPool {
     }
 
     public synchronized EndpointsApi getConnection() {
+        this.refreshUrlsFromDatabase();
         EndpointsApi endpointsApi = connections.values().stream().findFirst().orElse(null);
         if(endpointsApi != null){
             connections.remove(endpointsApi.getApiClient().getBasePath());
