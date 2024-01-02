@@ -38,7 +38,7 @@ public class ConnectionPool {
         inferenceInstanceSet.forEach(inferenceInstance -> {
             ApiClient apiClient = new ApiClient();
             apiClient.setBasePath(inferenceInstance.getInstanceUrl());
-            if(!connectionsActive.containsKey(inferenceInstance.getInstanceUrl())){
+            if(!connectionsActive.containsKey(inferenceInstance.getInstanceUrl()) && inferenceInstance.getAvailable()){
                 connections.put(inferenceInstance.getInstanceUrl(), new EndpointsApi(apiClient));
             }
         });
