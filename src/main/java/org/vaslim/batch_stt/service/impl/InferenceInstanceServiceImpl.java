@@ -1,5 +1,7 @@
 package org.vaslim.batch_stt.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.vaslim.batch_stt.dto.InferenceInstanceDTO;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 @Service
 public class InferenceInstanceServiceImpl implements InferenceInstanceService {
 
+    private static final Logger logger = LoggerFactory.getLogger(InferenceInstanceServiceImpl.class);
     private final AppUserRepository appUserRepository;
 
     private final InferenceInstanceRepository inferenceInstanceRepository;
@@ -90,6 +93,7 @@ public class InferenceInstanceServiceImpl implements InferenceInstanceService {
             int responseCode = connection.getResponseCode();
             return (responseCode == HttpURLConnection.HTTP_OK);
         } catch (IOException e) {
+            logger.info("Instance " + basePath + " failed online check with exception: " + e.getMessage());
             return false;
         }
     }

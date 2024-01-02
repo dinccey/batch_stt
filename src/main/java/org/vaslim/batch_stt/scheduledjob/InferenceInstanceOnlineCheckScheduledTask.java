@@ -1,5 +1,7 @@
 package org.vaslim.batch_stt.scheduledjob;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -10,6 +12,8 @@ import org.vaslim.batch_stt.service.InferenceInstanceService;
 @Component
 @EnableScheduling
 public class InferenceInstanceOnlineCheckScheduledTask {
+
+    private static final Logger logger = LoggerFactory.getLogger(InferenceInstanceOnlineCheckScheduledTask.class);
 
     private final InferenceInstanceRepository inferenceInstanceRepository;
 
@@ -25,14 +29,16 @@ public class InferenceInstanceOnlineCheckScheduledTask {
 
     @Scheduled(cron = "*/1 * * * * *")
     public void run() {
-//        inferenceInstanceRepository.findAll().forEach(inferenceInstance -> {
-//            inferenceInstance.setAvailable(inferenceInstanceService.checkIsReachable(inferenceInstance.getInstanceUrl()));
-//            inferenceInstanceRepository.save(inferenceInstance);
-//        });
+        logger.info("online check.");
+        inferenceInstanceRepository.findAll().forEach(inferenceInstance -> {
+            inferenceInstance.setAvailable(inferenceInstanceService.checkIsReachable(inferenceInstance.getInstanceUrl()));
+            inferenceInstanceRepository.save(inferenceInstance);
+        });
     }
 
     @Scheduled(cron = "*/10 * * * * *")
     public void runRefreshConnectionPool() {
+        logger.info("Refresh connection pool.");
         connectionPool.refreshUrlsFromDatabase();
     }
 

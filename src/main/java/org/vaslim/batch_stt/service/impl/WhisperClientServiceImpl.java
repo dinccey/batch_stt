@@ -1,5 +1,7 @@
 package org.vaslim.batch_stt.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.vaslim.batch_stt.enums.ProcessingStatus;
@@ -28,6 +30,8 @@ public class WhisperClientServiceImpl implements WhisperClientService {
 
     @Value("${output.format}")
     private String outputFormat;
+
+    private static final Logger logger = LoggerFactory.getLogger(WhisperClientServiceImpl.class);
 
     private final FileService fileService;
 
@@ -77,24 +81,24 @@ public class WhisperClientServiceImpl implements WhisperClientService {
                         }
                         connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        logger.warn("Inference failed with exception: " + e.getMessage());
                         updateItemStatus(videoFile, ProcessingStatus.PENDING);
-                        disableInferenceInstanceOnFailure(endpointsApi);
-                        connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
+                        updateInferenceInstanceOnFailure(endpointsApi);
+                        //connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
 
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.warn("Inference failed with exception: " + e.getMessage());
                     updateItemStatus(videoFile, ProcessingStatus.PENDING);
-                    disableInferenceInstanceOnFailure(endpointsApi);
-                    connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
+                    updateInferenceInstanceOnFailure(endpointsApi);
+                    //connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
                 }
             }).start();
 
         });
     }
 
-    private void disableInferenceInstanceOnFailure(EndpointsApi[] endpointsApi) {
+    private void updateInferenceInstanceOnFailure(EndpointsApi[] endpointsApi) {
         InferenceInstance inferenceInstance = inferenceInstanceRepository.findByInstanceUrl(endpointsApi[0].getApiClient().getBasePath()).orElse(null);
         assert inferenceInstance != null;
         //inferenceInstance.setAvailable(false);
