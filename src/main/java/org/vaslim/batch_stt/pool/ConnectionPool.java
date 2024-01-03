@@ -36,12 +36,12 @@ public class ConnectionPool {
         List<InferenceInstance> inferenceInstanceSet = inferenceInstanceRepository.findAll();
         connections.clear();
         inferenceInstanceSet.forEach(inferenceInstance -> {
+            if(connectionsActive.containsKey(inferenceInstance.getInstanceUrl()) && !inferenceInstance.getAvailable()){
+                connectionsActive.remove(inferenceInstance.getInstanceUrl());
+            }
             if (inferenceInstance.getAvailable()){
                 ApiClient apiClient = new ApiClient();
                 apiClient.setBasePath(inferenceInstance.getInstanceUrl());
-                if(connectionsActive.containsKey(inferenceInstance.getInstanceUrl()) && !inferenceInstance.getAvailable()){
-                    connectionsActive.remove(inferenceInstance.getInstanceUrl());
-                }
                 if(!connectionsActive.containsKey(inferenceInstance.getInstanceUrl())){
                     connections.put(inferenceInstance.getInstanceUrl(), new EndpointsApi(apiClient));
                 }
