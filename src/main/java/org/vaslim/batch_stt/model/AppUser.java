@@ -19,16 +19,17 @@ public class AppUser {
     private boolean admin = false;
 
     @Column
-    private Integer itemsProcessed = 0;
+    private Integer itemsProcessed;
 
     @Column
-    private Long totalProcessingTimeSeconds = 0L;
+    private Long totalProcessingTimeSeconds;
 
 
     @OneToMany(mappedBy="appUser", cascade = CascadeType.ALL)
     private Set<InferenceInstance> inferenceInstances;
 
     public Integer getItemsProcessed() {
+        if(itemsProcessed == null) return 0;
         return itemsProcessed;
     }
 

@@ -19,13 +19,13 @@ public class InferenceInstance {
     private Boolean available;
 
     @Column
-    private Integer itemsProcessed = 0;
+    private Integer itemsProcessed;
 
     @Column
-    private Integer failedRunsCount = 0;
+    private Integer failedRunsCount;
 
     @Column
-    private Long totalProcessingTimeSeconds = 0L;
+    private Long totalProcessingTimeSeconds;
 
     @ManyToOne
     @JoinColumn(name="appUser", nullable=false)
@@ -64,6 +64,7 @@ public class InferenceInstance {
     }
 
     public Integer getItemsProcessed() {
+        if(itemsProcessed == null) return 0;
         return itemsProcessed;
     }
 
@@ -72,6 +73,7 @@ public class InferenceInstance {
     }
 
     public Integer getFailedRunsCount() {
+        if(failedRunsCount == null) return 0;
         return failedRunsCount;
     }
 
