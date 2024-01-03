@@ -17,6 +17,6 @@ public interface Constants
 
     interface Files {
         List<String> transcribeExtensions = List.of(".srt",".vtt",".txt",".json",".tsv");
-        List<String> ignoreExtensions = List.of("mp3","zip");
+        List<String> ignoreExtensions = List.of("mp3","zip","jpg","png","tar");
     }
 }
