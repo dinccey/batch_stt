@@ -14,7 +14,12 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.vaslim.batch_stt.filters.AuthTokenFilter;
+
+import static org.vaslim.batch_stt.constants.Constants.Endpoint.ALL_PATHS;
 
 @Configuration
 @EnableMethodSecurity
@@ -74,7 +79,7 @@ public class WebSecurityConfig {
     }
 
 
-    /**@Bean
+    @Bean
     CorsConfigurationSource corsConfigurationSource() {
         final UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
 
@@ -100,5 +105,5 @@ public class WebSecurityConfig {
         source.registerCorsConfiguration(ALL_PATHS, corsConfiguration);
 
         return source;
-    }**/
+    }
 }
