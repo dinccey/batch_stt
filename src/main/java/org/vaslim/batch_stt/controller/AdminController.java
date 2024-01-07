@@ -97,6 +97,7 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
+    @CrossOrigin("http://localhost:8081/*")
     @GetMapping("user/all")
     public ResponseEntity<Set<AppUserDTO>> allUsers(final HttpServletRequest httpServletRequest) {
         Cookie cookie = WebUtils.getCookie(httpServletRequest, cookieName);
