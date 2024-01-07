@@ -86,8 +86,8 @@ public class InferenceInstanceServiceImpl implements InferenceInstanceService {
     public Boolean checkIsReachable(String basePath) {
         final int timeout = 2000;
         try {
-//            boolean reachable = InetAddress.getByAddress(getBytesHostFromUrl(basePath)).isReachable(timeout);
-//            if(!reachable) throw new IOException("Address not reachable.");
+            boolean reachable = InetAddress.getByName(getHostFromUrl(basePath)).isReachable(timeout);
+            if(!reachable) throw new IOException("Address not reachable.");
             Socket socket = new Socket();
             socket.connect(new InetSocketAddress(getHostFromUrl(basePath), getPortFromUrl(basePath)), timeout);
             URL url = new URL(basePath+"/docs");
@@ -113,18 +113,6 @@ public class InferenceInstanceServiceImpl implements InferenceInstanceService {
         basePath = stripPrefix(basePath);
 
         return basePath.split(":")[0];
-    }
-
-    private byte[] getBytesHostFromUrl(String basePath) {
-        basePath = stripPrefix(basePath);
-        String addr = basePath.split(":")[0];
-
-        String[] ipStr = addr.split("\\.");
-        byte[] bytes = new byte[ipStr.length];
-        for (int i = 0; i < ipStr.length; i++) {
-            bytes[i] = Integer.valueOf(ipStr[i], 10).byteValue();
-        }
-        return bytes;
     }
 
     private String stripPrefix(String basePath) {
