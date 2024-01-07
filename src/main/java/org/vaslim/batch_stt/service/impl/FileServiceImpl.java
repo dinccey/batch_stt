@@ -72,11 +72,11 @@ public class FileServiceImpl implements FileService {
             List<String> videoPaths = filePaths.stream().filter(filePath -> !filePath.endsWith(outputFormat)
                     && !filePath.contains(outputFormat + "+")).toList();
             videoPaths.forEach(this::saveToProcess);
-            List<String> textPaths = filePaths.stream().filter(filePath -> Constants.Files.transcribeExtensions.stream().anyMatch(filePath::endsWith)).toList();
+            List<String> textPaths = filePaths.stream().filter(filePath -> Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(filePath::endsWith)).toList();
             textPaths.forEach(textPath->{
                 String subtitleName = textPath.substring(0,textPath.lastIndexOf("."));
                 String videoPath = videoPaths.stream().filter(video->video.substring(0,video.lastIndexOf(".")).equals(subtitleName)
-                        && Constants.Files.ignoreExtensions.stream().noneMatch(video::endsWith)).findFirst().get();
+                        && Constants.Files.IGNORE_EXTENSIONS.stream().noneMatch(video::endsWith)).findAny().orElse(null);
                 saveAsProcessed(videoPath, textPath);
             });
 
@@ -127,8 +127,8 @@ public class FileServiceImpl implements FileService {
     public void saveToProcess(String path){
         try {
             if(itemRepository.existsItemByFilePathVideoLike(path)
-                    || Constants.Files.transcribeExtensions.stream().anyMatch(path::contains)
-                    || Constants.Files.ignoreExtensions.stream().anyMatch(path::contains)) return;
+                    || Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(path::contains)
+                    || Constants.Files.IGNORE_EXTENSIONS.stream().anyMatch(path::contains)) return;
             Item item = new Item();
             item.setFilePathVideo(path);
             itemRepository.save(item);

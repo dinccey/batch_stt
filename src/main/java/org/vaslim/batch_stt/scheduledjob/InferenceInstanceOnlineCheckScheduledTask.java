@@ -36,22 +36,22 @@ public class InferenceInstanceOnlineCheckScheduledTask {
         //logger.info("online check.");
         Set<String> instanceIds = inferenceInstanceRepository.findAll().stream().map(InferenceInstance::getInstanceUrl).collect(Collectors.toSet());
         instanceIds.forEach(id->{
+            boolean available = inferenceInstanceService.checkIsReachable(id);
+            InferenceInstance inferenceInstance = inferenceInstanceRepository.findByInstanceUrl(id).orElse(null);
 
-        });
-        inferenceInstanceRepository.findAll().forEach(inferenceInstance -> {
-            boolean valueBefore = inferenceInstance.getAvailable();
-            boolean valueAfter = inferenceInstanceService.checkIsReachable(inferenceInstance.getInstanceUrl());
-            inferenceInstance.setAvailable(valueAfter);
-            inferenceInstanceRepository.save(inferenceInstance);
-            if(valueAfter != valueBefore){
-                logger.warn(inferenceInstance.getInstanceUrl() + "'s online status went from " + valueBefore + " to " + valueAfter);
+            assert inferenceInstance != null;
+            boolean availableBefore = inferenceInstance.getAvailable();
+            if(availableBefore != available){
+                inferenceInstance.setAvailable(available);
+                inferenceInstanceRepository.save(inferenceInstance);
+                logger.warn(inferenceInstance.getInstanceUrl() + "'s online status went from " + availableBefore + " to " + available);
             }
         });
     }
 
     @Scheduled(cron = "*/10 * * * * *")
     public void runRefreshConnectionPool() {
-        logger.info("Refresh connection pool.");
+        //logger.info("Refresh connection pool.");
         connectionPool.refreshUrlsFromDatabase();
     }
 
