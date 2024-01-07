@@ -5,9 +5,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.vaslim.batch_stt.model.InferenceInstance;
 import org.vaslim.batch_stt.pool.ConnectionPool;
 import org.vaslim.batch_stt.repository.InferenceInstanceRepository;
 import org.vaslim.batch_stt.service.InferenceInstanceService;
+
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Configuration
 @EnableScheduling
@@ -29,7 +33,11 @@ public class InferenceInstanceOnlineCheckScheduledTask {
 
     @Scheduled(cron = "*/1 * * * * *")
     public void run() {
-        logger.info("online check.");
+        //logger.info("online check.");
+        Set<String> instanceIds = inferenceInstanceRepository.findAll().stream().map(InferenceInstance::getInstanceUrl).collect(Collectors.toSet());
+        instanceIds.forEach(id->{
+
+        });
         inferenceInstanceRepository.findAll().forEach(inferenceInstance -> {
             boolean valueBefore = inferenceInstance.getAvailable();
             boolean valueAfter = inferenceInstanceService.checkIsReachable(inferenceInstance.getInstanceUrl());
