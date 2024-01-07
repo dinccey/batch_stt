@@ -19,7 +19,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-//@CrossOrigin(origins = "${frontend.origin}", maxAge = 3600, allowCredentials = "true")
+@CrossOrigin(origins = "${frontend.origin}", maxAge = 3600, allowCredentials = "true")
 @RestController
 @RequestMapping("api/v1/admin")
 public class AdminController {
