@@ -20,7 +20,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 //@CrossOrigin(origins = {"${frontend.origin}"}, maxAge = 3600, allowCredentials = "true")
-@CrossOrigin(origins = {"http://localhost:8081/","http://localhost:8081/users"}, maxAge = 3600, allowCredentials = "true")
+//@CrossOrigin(origins = {"http://localhost:8081/","http://localhost:8081/users"}, maxAge = 3600, allowCredentials = "true")
 @RestController
 @RequestMapping("api/v1/admin")
 public class AdminController {
