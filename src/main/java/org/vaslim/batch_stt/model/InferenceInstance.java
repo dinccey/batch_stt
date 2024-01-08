@@ -56,6 +56,7 @@ public class InferenceInstance {
     }
 
     public Boolean getAvailable() {
+        if (available == null) return false;
         return available;
     }
 
