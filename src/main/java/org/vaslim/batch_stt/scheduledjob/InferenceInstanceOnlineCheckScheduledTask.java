@@ -36,11 +36,12 @@ public class InferenceInstanceOnlineCheckScheduledTask {
         //logger.info("online check.");
         Set<String> instanceIds = inferenceInstanceRepository.findAll().stream().map(InferenceInstance::getInstanceUrl).collect(Collectors.toSet());
         instanceIds.forEach(id->{
-            boolean available = inferenceInstanceService.checkIsReachable(id);
+            Boolean available = inferenceInstanceService.checkIsReachable(id);
             InferenceInstance inferenceInstance = inferenceInstanceRepository.findByInstanceUrl(id).orElse(null);
 
             assert inferenceInstance != null;
-            boolean availableBefore = inferenceInstance.getAvailable();
+            Boolean availableBefore = inferenceInstance.getAvailable();
+            if(availableBefore == null) availableBefore = false;
             if(availableBefore != available){
                 inferenceInstance.setAvailable(available);
                 inferenceInstanceRepository.save(inferenceInstance);
