@@ -88,8 +88,6 @@ public class InferenceInstanceServiceImpl implements InferenceInstanceService {
         try {
             boolean reachable = InetAddress.getByName(getHostFromUrl(basePath)).isReachable(timeout);
             if(!reachable) throw new IOException("Address not reachable.");
-            Socket socket = new Socket();
-            socket.connect(new InetSocketAddress(getHostFromUrl(basePath), getPortFromUrl(basePath)), timeout);
             URL url = new URL(basePath+"/docs");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");

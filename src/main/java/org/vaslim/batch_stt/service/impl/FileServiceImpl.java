@@ -48,7 +48,6 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public File processFile(File file, String outputFilePathName, EndpointsApi endpointsApi) throws IOException {
-
         logger.info("Starting inference on " + endpointsApi.getApiClient().getBasePath() + " " + file.getName());
         byte[] fileContent = endpointsApi.asrAsrPost(file, TASK_TRANSCRIBE,"","", true, outputFormat);
         FileOutputStream fos = new FileOutputStream(outputFilePathName);

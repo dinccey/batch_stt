@@ -11,6 +11,7 @@ import org.vaslim.batch_stt.repository.InferenceInstanceRepository;
 import org.vaslim.batch_stt.service.InferenceInstanceService;
 
 import java.util.Set;
+import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
 @Configuration
@@ -35,20 +36,35 @@ public class InferenceInstanceOnlineCheckScheduledTask {
     public void run() {
         //logger.info("online check.");
         Set<String> instanceIds = inferenceInstanceRepository.findAll().stream().map(InferenceInstance::getInstanceUrl).collect(Collectors.toSet());
-        instanceIds.forEach(id->{
-            Boolean available = inferenceInstanceService.checkIsReachable(id);
-            InferenceInstance inferenceInstance = inferenceInstanceRepository.findByInstanceUrl(id).orElse(null);
+        ExecutorService executor = Executors.newFixedThreadPool(instanceIds.size()); // create a thread pool
 
-            assert inferenceInstance != null;
-            Boolean availableBefore = inferenceInstance.getAvailable();
-            if(availableBefore == null) availableBefore = false;
-            if(availableBefore != available){
-                inferenceInstance.setAvailable(available);
+        instanceIds.forEach(id -> {
+            Future<Boolean> future = executor.submit(() -> inferenceInstanceService.checkIsReachable(id)); // submit the task to be executed
+
+            try {
+                Boolean available = future.get(5000, TimeUnit.MILLISECONDS); // get the result of the future with a timeout
+                InferenceInstance inferenceInstance = inferenceInstanceRepository.findByInstanceUrl(id).orElse(null);
+
+                assert inferenceInstance != null;
+                Boolean availableBefore = inferenceInstance.getAvailable();
+                if (availableBefore == null) availableBefore = false;
+                if (availableBefore != available) {
+                    inferenceInstance.setAvailable(available);
+                    inferenceInstanceRepository.save(inferenceInstance);
+                    logger.warn(inferenceInstance.getInstanceUrl() + "'s online status went from " + availableBefore + " to " + available);
+                }
+            } catch (InterruptedException | ExecutionException | TimeoutException e) {
+                InferenceInstance inferenceInstance = inferenceInstanceRepository.findByInstanceUrl(id).orElse(null);
+                assert inferenceInstance != null;
+                inferenceInstance.setAvailable(false);
                 inferenceInstanceRepository.save(inferenceInstance);
-                logger.warn(inferenceInstance.getInstanceUrl() + "'s online status went from " + availableBefore + " to " + available);
+                //logger.error("Error checking reachability for " + id, e);
             }
         });
+
+        executor.shutdown(); // shut down the executor service
     }
+
 
     @Scheduled(cron = "*/10 * * * * *")
     public void runRefreshConnectionPool() {
