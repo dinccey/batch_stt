@@ -17,7 +17,6 @@ import org.vaslim.whisper_asr.client.api.EndpointsApi;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Optional;
 
 import static java.lang.Thread.sleep;
@@ -53,48 +52,48 @@ public class WhisperClientServiceImpl implements WhisperClientService {
 
     @Override
     public void processAllFiles() {
-        List<Item> unprocessedItems = itemRepository.findAllByFilePathTextIsNull();
-        logger.info("STARTED processing loop, unprocessedItems size: " + unprocessedItems.size());
-        unprocessedItems.forEach(item -> {
-            String videoPath = item.getFilePathVideo();
-            File videoFile = new File(videoPath);
-            updateItemStatus(videoFile, ProcessingStatus.IN_PROGRESS);
-            final EndpointsApi[] endpointsApi = new EndpointsApi[1];
-            while (endpointsApi[0] == null){
-                endpointsApi[0] = connectionPool.getConnection();
-                sleepMilis(500L);
-            }
-            new Thread(() -> {
-                try {
-                    String outputFileNamePath = videoFile.getAbsolutePath().substring(0,videoFile.getAbsolutePath().lastIndexOf(".")) + "." + outputFormat;
-                    File audioFile = fileService.extractAudio(videoFile);
-                    long startTime = System.currentTimeMillis();
-                    long endTime;
-                    try {
-                        fileService.processFile(audioFile, outputFileNamePath, endpointsApi[0]);
-                        endTime = System.currentTimeMillis();
-                        if (new File(outputFileNamePath).exists()){
-                            fileService.saveAsProcessed(videoPath , outputFileNamePath);
-                            statisticsService.incrementProcessedItemsPerInstance(endpointsApi[0].getApiClient().getBasePath());
-                            statisticsService.incrementTotalProcessingTimePerInstance(endpointsApi[0].getApiClient().getBasePath(),endTime - startTime);
-                        }
-                        connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
-                    } catch (Exception e) {
-                        logger.warn("Inference failed with exception: " + e.getMessage());
-                        updateItemStatus(videoFile, ProcessingStatus.PENDING);
-                        updateInferenceInstanceOnFailure(endpointsApi);
-                        connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
+        Optional<Item> item = itemRepository.findFirstByFilePathTextIsNullAndProcessingStatus(ProcessingStatus.PENDING);
+        if(item.isEmpty()) return;
 
+        final EndpointsApi[] endpointsApi = new EndpointsApi[1];
+        while (endpointsApi[0] == null){
+            endpointsApi[0] = connectionPool.getConnection();
+            sleepMilis(500L);
+        }
+
+        String videoPath = item.get().getFilePathVideo();
+        File videoFile = new File(videoPath);
+        updateItemStatus(videoFile, ProcessingStatus.IN_PROGRESS);
+
+        new Thread(() -> {
+            try {
+                String outputFileNamePath = videoFile.getAbsolutePath().substring(0,videoFile.getAbsolutePath().lastIndexOf(".")) + "." + outputFormat;
+                File audioFile = fileService.extractAudio(videoFile);
+                long startTime = System.currentTimeMillis();
+                long endTime;
+                try {
+                    fileService.processFile(audioFile, outputFileNamePath, endpointsApi[0]);
+                    endTime = System.currentTimeMillis();
+                    if (new File(outputFileNamePath).exists()){
+                        fileService.saveAsProcessed(videoPath , outputFileNamePath);
+                        statisticsService.incrementProcessedItemsPerInstance(endpointsApi[0].getApiClient().getBasePath());
+                        statisticsService.incrementTotalProcessingTimePerInstance(endpointsApi[0].getApiClient().getBasePath(),endTime - startTime);
                     }
+                    connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
                 } catch (Exception e) {
                     logger.warn("Inference failed with exception: " + e.getMessage());
                     updateItemStatus(videoFile, ProcessingStatus.PENDING);
                     updateInferenceInstanceOnFailure(endpointsApi);
                     connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
-                }
-            }).start();
 
-        });
+                }
+            } catch (Exception e) {
+                logger.warn("Inference failed with exception: " + e.getMessage());
+                updateItemStatus(videoFile, ProcessingStatus.PENDING);
+                updateInferenceInstanceOnFailure(endpointsApi);
+                connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
+            }
+        }).start();
     }
 
     private void updateInferenceInstanceOnFailure(EndpointsApi[] endpointsApi) {

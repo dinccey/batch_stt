@@ -34,7 +34,7 @@ public class TranscribingScheduledTask {
 
     }
 
-    @Scheduled(cron = "*/10 * * * * *")
+    @Scheduled(cron = "*/1 * * * * *")
     public void runProcessing(){
         if(fileProcessingTaskReentrantLock.tryLock()){
             try {
