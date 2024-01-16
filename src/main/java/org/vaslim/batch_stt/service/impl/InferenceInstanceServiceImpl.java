@@ -88,12 +88,12 @@ public class InferenceInstanceServiceImpl implements InferenceInstanceService {
         try {
             boolean reachable = InetAddress.getByName(getHostFromUrl(basePath)).isReachable(timeout);
             if(!reachable) throw new IOException("Address not reachable.");
-            URL url = new URL(basePath+"/docs");
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            connection.setConnectTimeout(timeout);
-            int responseCode = connection.getResponseCode();
-            return (responseCode == HttpURLConnection.HTTP_OK);
+            try (Socket socket = new Socket()) {
+                socket.connect(new InetSocketAddress(getHostFromUrl(basePath), getPortFromUrl(basePath)), timeout);
+                return true;
+            } catch (IOException e) {
+                return false; // Either timeout or unreachable or failed DNS lookup.
+            }
         } catch (IOException e) {
             //logger.info("Instance " + basePath + " failed online check with exception: " + e.getMessage());
             return false;
