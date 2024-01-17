@@ -72,4 +72,24 @@ public class InferenceInstanceOnlineCheckScheduledTask {
         connectionPool.refreshUrlsFromDatabase();
     }
 
+    @Scheduled(cron = "0 */10 * * * *")
+    public void cleanupZombieInstances(){
+        //if connection is lost during inference, an instance will remain stuck as being used while it is available
+        Set<String> instanceIds = inferenceInstanceRepository.findAll().stream().map(InferenceInstance::getInstanceUrl).collect(Collectors.toSet());
+        ExecutorService executor = Executors.newFixedThreadPool(instanceIds.size()); // create a thread pool
+
+        instanceIds.forEach(id -> {
+            Future<Boolean> future = executor.submit(() -> inferenceInstanceService.checkIsWhisperAvailable(id)); // submit the task to be executed
+
+            try {
+                Boolean available = future.get(2000, TimeUnit.MILLISECONDS); // get the result of the future with a timeout
+                if(available) connectionPool.addConnection(id);
+            } catch (InterruptedException | ExecutionException | TimeoutException ignored) {
+
+            }
+        });
+
+        executor.shutdown();
+    }
+
 }

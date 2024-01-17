@@ -100,6 +100,20 @@ public class InferenceInstanceServiceImpl implements InferenceInstanceService {
         }
     }
 
+    @Override
+    public Boolean checkIsWhisperAvailable(String basePath) {
+        try {
+            URL url = new URL(basePath+"/docs");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000);
+            int responseCode = connection.getResponseCode();
+            return (responseCode == HttpURLConnection.HTTP_OK);
+        } catch (IOException e) {
+            return false;
+        }
+    }
+
     private int getPortFromUrl(String basePath) {
         basePath = stripPrefix(basePath);
 
