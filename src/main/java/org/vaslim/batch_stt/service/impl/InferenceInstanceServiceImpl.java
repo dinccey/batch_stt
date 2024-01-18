@@ -106,7 +106,7 @@ public class InferenceInstanceServiceImpl implements InferenceInstanceService {
             URL url = new URL(basePath+"/docs");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
-            connection.setConnectTimeout(5000);
+            connection.setConnectTimeout(15000);
             int responseCode = connection.getResponseCode();
             return (responseCode == HttpURLConnection.HTTP_OK);
         } catch (IOException e) {
