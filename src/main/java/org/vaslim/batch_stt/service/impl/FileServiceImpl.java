@@ -96,6 +96,7 @@ public class FileServiceImpl implements FileService {
             String subtitleName = textPath.substring(0,textPath.lastIndexOf("."));
             String videoPath = videoPaths.stream().filter(video->video.substring(0,video.lastIndexOf(".")).equals(subtitleName)
                     && Constants.Files.IGNORE_EXTENSIONS.stream().noneMatch(video::endsWith)).findAny().orElse(null);
+            if(counterTxt.get() == 183) System.out.println(videoPath + "; " + textPath);
             saveAsProcessed(videoPath, textPath);
             counterTxt.getAndIncrement();
         });
