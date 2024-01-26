@@ -142,7 +142,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public void saveAsProcessed(String videoPath, String outputPath){
         Optional<Item> item = itemRepository.findByFilePathVideoEquals(videoPath);
-        if(item.isPresent() || outputPath == null){
+        if(item.isPresent() && outputPath != null){
             try{
                 item.get().setFilePathText(outputPath);
                 item.get().setProcessedTimestamp(LocalDateTime.now());

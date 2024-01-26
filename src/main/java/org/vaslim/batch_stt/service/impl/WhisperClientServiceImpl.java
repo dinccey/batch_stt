@@ -124,6 +124,7 @@ public class WhisperClientServiceImpl implements WhisperClientService {
             }
             fileService.findUnprocessedFiles(Path.of(directory.getAbsolutePath()));
         }
+        logger.info("Done finding files.");
     }
 
     private void sleepMilis(Long milis){
