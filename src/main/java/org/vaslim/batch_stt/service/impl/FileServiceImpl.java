@@ -61,6 +61,7 @@ public class FileServiceImpl implements FileService {
         return file;
     }
 
+    @Transactional
     @Override
     public void findUnprocessedFiles(Path path) {
         try (Stream<Path> paths = Files.walk(path)) {
@@ -88,7 +89,6 @@ public class FileServiceImpl implements FileService {
         }
     }
 
-    @Transactional
     protected void saveProcessed(List<String> textPaths, List<String> videoPaths) {
         AtomicInteger counterTxt = new AtomicInteger();
         textPaths.forEach(textPath->{
