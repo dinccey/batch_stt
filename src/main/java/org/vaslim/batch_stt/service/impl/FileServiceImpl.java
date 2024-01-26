@@ -94,10 +94,13 @@ public class FileServiceImpl implements FileService {
         textPaths.forEach(textPath->{
             System.out.println("txt counter " + counterTxt.get());
             String subtitleName = textPath.substring(0,textPath.lastIndexOf("."));
+            System.out.println("I am here 1");
             String videoPath = videoPaths.stream().filter(video->video.substring(0,video.lastIndexOf(".")).equals(subtitleName)
                     && Constants.Files.IGNORE_EXTENSIONS.stream().noneMatch(video::endsWith)).findAny().orElse(null);
+            System.out.println("I am here 2");
             if(counterTxt.get() == 183) System.out.println(videoPath + "; " + textPath);
             saveAsProcessed(videoPath, textPath);
+            System.out.println("I am here 3");
             counterTxt.getAndIncrement();
         });
     }
@@ -155,6 +158,7 @@ public class FileServiceImpl implements FileService {
     @Override
     public void saveAsProcessed(String videoPath, String outputPath){
         Optional<Item> item = itemRepository.findByFilePathVideoEquals(videoPath);
+        System.out.println("I am here 5");
         if(item.isPresent() && outputPath != null){
             try{
                 item.get().setFilePathText(outputPath);
@@ -162,6 +166,7 @@ public class FileServiceImpl implements FileService {
                 item.get().setProcessingStatus(ProcessingStatus.FINISHED);
                 item.get().setVideoFileName(videoPath.substring(videoPath.lastIndexOf("/")+1));
                 counter++;
+                System.out.println("I am here 4");
                 itemRepository.saveAndFlush(item.get());
             } catch (Exception e){
                 e.printStackTrace();
