@@ -22,6 +22,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 @Service
@@ -77,11 +78,14 @@ public class FileServiceImpl implements FileService {
             videoPaths.forEach(this::saveToProcess);
             List<String> textPaths = filePaths.stream().filter(filePath -> Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(filePath::endsWith)).toList();
             logger.info("Found text paths from transcribe extensions: " + textPaths.size());
+            AtomicInteger counterTxt = new AtomicInteger();
             textPaths.forEach(textPath->{
+                System.out.println("txt counter " + counterTxt.get());
                 String subtitleName = textPath.substring(0,textPath.lastIndexOf("."));
                 String videoPath = videoPaths.stream().filter(video->video.substring(0,video.lastIndexOf(".")).equals(subtitleName)
                         && Constants.Files.IGNORE_EXTENSIONS.stream().noneMatch(video::endsWith)).findAny().orElse(null);
                 saveAsProcessed(videoPath, textPath);
+                counterTxt.getAndIncrement();
             });
             logger.info("Number of files that are saved as processed: " + counter);
 
