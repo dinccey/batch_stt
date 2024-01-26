@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.vaslim.batch_stt.constants.Constants;
 import org.vaslim.batch_stt.enums.ProcessingStatus;
 import org.vaslim.batch_stt.exception.BatchSttException;
@@ -78,21 +79,26 @@ public class FileServiceImpl implements FileService {
             videoPaths.forEach(this::saveToProcess);
             List<String> textPaths = filePaths.stream().filter(filePath -> Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(filePath::endsWith)).toList();
             logger.info("Found text paths from transcribe extensions: " + textPaths.size());
-            AtomicInteger counterTxt = new AtomicInteger();
-            textPaths.forEach(textPath->{
-                System.out.println("txt counter " + counterTxt.get());
-                String subtitleName = textPath.substring(0,textPath.lastIndexOf("."));
-                String videoPath = videoPaths.stream().filter(video->video.substring(0,video.lastIndexOf(".")).equals(subtitleName)
-                        && Constants.Files.IGNORE_EXTENSIONS.stream().noneMatch(video::endsWith)).findAny().orElse(null);
-                saveAsProcessed(videoPath, textPath);
-                counterTxt.getAndIncrement();
-            });
+            saveProcessed(textPaths, videoPaths);
             logger.info("Number of files that are saved as processed: " + counter);
 
         } catch (IOException | NoSuchElementException e) {
             e.printStackTrace();
             throw new BatchSttException(e.getMessage());
         }
+    }
+
+    @Transactional
+    protected void saveProcessed(List<String> textPaths, List<String> videoPaths) {
+        AtomicInteger counterTxt = new AtomicInteger();
+        textPaths.forEach(textPath->{
+            System.out.println("txt counter " + counterTxt.get());
+            String subtitleName = textPath.substring(0,textPath.lastIndexOf("."));
+            String videoPath = videoPaths.stream().filter(video->video.substring(0,video.lastIndexOf(".")).equals(subtitleName)
+                    && Constants.Files.IGNORE_EXTENSIONS.stream().noneMatch(video::endsWith)).findAny().orElse(null);
+            saveAsProcessed(videoPath, textPath);
+            counterTxt.getAndIncrement();
+        });
     }
 
     @Override
