@@ -68,10 +68,12 @@ public class FileServiceImpl implements FileService {
                     filePaths.add(filePath.toString());
                 }
             }
+            //check that filePath doesn't end with text file extension or that it is a backup of the word filter
             List<String> videoPaths = filePaths.stream().filter(filePath -> !filePath.endsWith(outputFormat)
                     && !filePath.contains(outputFormat + "+")).toList();
             videoPaths.forEach(this::saveToProcess);
             List<String> textPaths = filePaths.stream().filter(filePath -> Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(filePath::endsWith)).toList();
+            logger.info("Found text paths from transcribe extensions: " + textPaths.size());
             textPaths.forEach(textPath->{
                 String subtitleName = textPath.substring(0,textPath.lastIndexOf("."));
                 String videoPath = videoPaths.stream().filter(video->video.substring(0,video.lastIndexOf(".")).equals(subtitleName)
@@ -147,7 +149,8 @@ public class FileServiceImpl implements FileService {
                 item.get().setVideoFileName(videoPath.substring(videoPath.lastIndexOf("/")+1));
                 itemRepository.save(item.get());
             } catch (Exception e){
-
+                e.printStackTrace();
+                logger.error(e.getMessage());
             }
         }
     }
