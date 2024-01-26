@@ -68,6 +68,7 @@ public class FileServiceImpl implements FileService {
                     filePaths.add(filePath.toString());
                 }
             }
+            logger.info("Number of filePaths: " + filePaths.size());
             //check that filePath doesn't end with text file extension or that it is a backup of the word filter
             List<String> videoPaths = filePaths.stream().filter(filePath -> !filePath.endsWith(outputFormat)
                     && !filePath.contains(outputFormat + "+")).toList();
@@ -153,11 +154,14 @@ public class FileServiceImpl implements FileService {
                 logger.error(e.getMessage());
             }
         }
+        else{
+            logger.error("Video path to save as processed not found: " + videoPath);
+        }
     }
 
     public void deleteExcludedItemsFromDb(String[] excludedPaths){
         for (String path: excludedPaths){
-            System.out.println("Excluded path: " + path);
+            logger.info("Excluded path: " + path);
             itemRepository.deleteItemByFilePathVideoStartingWith(path);
         }
     }
