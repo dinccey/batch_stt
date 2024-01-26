@@ -33,6 +33,8 @@ public class FileServiceImpl implements FileService {
 
     private final ItemRepository itemRepository;
 
+    private int counter = 0;
+
     @Value("${output.format}")
     private String outputFormat;
 
@@ -86,7 +88,7 @@ public class FileServiceImpl implements FileService {
             e.printStackTrace();
             throw new BatchSttException(e.getMessage());
         }
-
+        logger.info("Number of files that are saved as processed: " + counter);
     }
 
     @Override
@@ -148,7 +150,8 @@ public class FileServiceImpl implements FileService {
                 item.get().setProcessedTimestamp(LocalDateTime.now());
                 item.get().setProcessingStatus(ProcessingStatus.FINISHED);
                 item.get().setVideoFileName(videoPath.substring(videoPath.lastIndexOf("/")+1));
-                logger.info(itemRepository.save(item.get()).getFilePathText());
+                counter++;
+                itemRepository.save(item.get());
             } catch (Exception e){
                 e.printStackTrace();
                 logger.error(e.getMessage());
