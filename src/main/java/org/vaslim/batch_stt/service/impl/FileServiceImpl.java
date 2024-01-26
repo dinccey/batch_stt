@@ -161,7 +161,7 @@ public class FileServiceImpl implements FileService {
                 item.get().setProcessingStatus(ProcessingStatus.FINISHED);
                 item.get().setVideoFileName(videoPath.substring(videoPath.lastIndexOf("/")+1));
                 counter++;
-                itemRepository.save(item.get());
+                itemRepository.saveAndFlush(item.get());
             } catch (Exception e){
                 e.printStackTrace();
                 logger.error(e.getMessage());
