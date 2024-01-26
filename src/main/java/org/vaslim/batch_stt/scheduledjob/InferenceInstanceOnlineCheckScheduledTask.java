@@ -36,6 +36,7 @@ public class InferenceInstanceOnlineCheckScheduledTask {
     public void run() {
         //logger.info("online check.");
         Set<String> instanceIds = inferenceInstanceRepository.findAll().stream().map(InferenceInstance::getInstanceUrl).collect(Collectors.toSet());
+        if(instanceIds.isEmpty()) return;
         ExecutorService executor = Executors.newFixedThreadPool(instanceIds.size()); // create a thread pool
 
         instanceIds.forEach(id -> {
@@ -76,7 +77,7 @@ public class InferenceInstanceOnlineCheckScheduledTask {
     public void cleanupZombieInstances(){
         //if connection is lost during inference, an instance will remain stuck as being used while it is available
         Set<String> instanceIds = inferenceInstanceRepository.findAll().stream().map(InferenceInstance::getInstanceUrl).collect(Collectors.toSet());
-        if(instanceIds == null || instanceIds.isEmpty()) return;
+        if(instanceIds.isEmpty()) return;
         ExecutorService executor = Executors.newFixedThreadPool(instanceIds.size()); // create a thread pool
 
         instanceIds.forEach(id -> {
