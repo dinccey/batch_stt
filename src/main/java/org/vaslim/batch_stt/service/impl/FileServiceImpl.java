@@ -83,12 +83,12 @@ public class FileServiceImpl implements FileService {
                         && Constants.Files.IGNORE_EXTENSIONS.stream().noneMatch(video::endsWith)).findAny().orElse(null);
                 saveAsProcessed(videoPath, textPath);
             });
+            logger.info("Number of files that are saved as processed: " + counter);
 
         } catch (IOException | NoSuchElementException e) {
             e.printStackTrace();
             throw new BatchSttException(e.getMessage());
         }
-        logger.info("Number of files that are saved as processed: " + counter);
     }
 
     @Override
