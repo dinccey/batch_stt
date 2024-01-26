@@ -148,14 +148,14 @@ public class FileServiceImpl implements FileService {
                 item.get().setProcessedTimestamp(LocalDateTime.now());
                 item.get().setProcessingStatus(ProcessingStatus.FINISHED);
                 item.get().setVideoFileName(videoPath.substring(videoPath.lastIndexOf("/")+1));
-                itemRepository.save(item.get());
+                logger.info(itemRepository.save(item.get()).getFilePathText());
             } catch (Exception e){
                 e.printStackTrace();
                 logger.error(e.getMessage());
             }
         }
         else{
-            logger.error("Video path to save as processed not found: " + videoPath);
+            logger.error("Video path to save as processed not found: " + videoPath + " outputPath = " + outputPath);
         }
     }
 
