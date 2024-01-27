@@ -93,8 +93,11 @@ public class FileServiceImpl implements FileService {
     protected void saveProcessed(List<String> textPaths) {
         AtomicInteger counterTxt = new AtomicInteger();
         textPaths.forEach(textPath->{
+            System.out.println("I am here 1");
             String subtitleName = textPath.substring(0,textPath.lastIndexOf("."));
+            System.out.println("I am here 2");
             saveAsProcessed(subtitleName, textPath);
+            System.out.println("I am here 3");
             counterTxt.getAndIncrement();
         });
     }
@@ -152,14 +155,19 @@ public class FileServiceImpl implements FileService {
     @Override
     public void saveAsProcessed(String pathNoExtension, String outputPath){
         Optional<Item> item = itemRepository.findByFilePathVideoStartingWith(pathNoExtension);
+        System.out.println("I am here 4");
         if(item.isPresent() && outputPath != null){
             try{
+                System.out.println("I am here 5");
                 item.get().setFilePathText(outputPath);
                 item.get().setProcessedTimestamp(LocalDateTime.now());
                 item.get().setProcessingStatus(ProcessingStatus.FINISHED);
+                System.out.println("I am here 6");
                 item.get().setVideoFileName(pathNoExtension.substring(pathNoExtension.lastIndexOf("/")+1));
                 counter++;
+                System.out.println("I am here 7");
                 itemRepository.saveAndFlush(item.get());
+                System.out.println("I am here 8");
             } catch (Exception e){
                 e.printStackTrace();
                 logger.error(e.getMessage());
