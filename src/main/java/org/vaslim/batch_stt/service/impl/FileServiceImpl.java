@@ -76,7 +76,7 @@ public class FileServiceImpl implements FileService {
             logger.info("Number of filePaths: " + filePaths.size());
             //check that filePath doesn't end with text file extension or that it is a backup of the word filter
             List<String> videoPaths = filePaths.stream().filter(filePath ->  Constants.Files.IGNORE_EXTENSIONS.stream().noneMatch(filePath::endsWith)
-                    && Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(filePath::endsWith)
+                    && Constants.Files.TRANSCRIBE_EXTENSIONS.stream().noneMatch(filePath::endsWith)
                     && !filePath.contains(outputFormat + "+")).toList();
             videoPaths.forEach(this::saveToProcess);
             List<String> textPaths = filePaths.stream().filter(filePath -> Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(filePath::endsWith)).toList();
