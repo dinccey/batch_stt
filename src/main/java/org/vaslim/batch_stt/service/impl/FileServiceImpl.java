@@ -81,7 +81,7 @@ public class FileServiceImpl implements FileService {
             videoPaths.forEach(this::saveToProcess);
             List<String> textPaths = filePaths.stream().filter(filePath -> Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(filePath::endsWith)).toList();
             logger.info("Found text paths from transcribe extensions: " + textPaths.size());
-            saveProcessed(textPaths, videoPaths);
+            saveProcessed(textPaths);
             logger.info("Number of files that are saved as processed: " + counter);
 
         } catch (IOException | NoSuchElementException e) {
@@ -90,7 +90,7 @@ public class FileServiceImpl implements FileService {
         }
     }
 
-    protected void saveProcessed(List<String> textPaths, List<String> videoPaths) {
+    protected void saveProcessed(List<String> textPaths) {
         AtomicInteger counterTxt = new AtomicInteger();
         textPaths.forEach(textPath->{
             String subtitleName = textPath.substring(0,textPath.lastIndexOf("."));
