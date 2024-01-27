@@ -54,7 +54,7 @@ public class WhisperClientServiceImpl implements WhisperClientService {
     @Override
     public void processAllFiles() {
         List<Item> unprocessedItems = itemRepository.findAllByFilePathTextIsNull();
-        logger.info("STARTED processing loop, unprocessedItems size: " + unprocessedItems.size());
+        //logger.info("STARTED processing loop, unprocessedItems size: " + unprocessedItems.size());
         unprocessedItems.forEach(item -> {
             String videoPath = item.getFilePathVideo();
             File videoFile = new File(videoPath);

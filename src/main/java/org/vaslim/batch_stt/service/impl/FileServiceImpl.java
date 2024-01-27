@@ -95,12 +95,12 @@ public class FileServiceImpl implements FileService {
             System.out.println("txt counter " + counterTxt.get());
             String subtitleName = textPath.substring(0,textPath.lastIndexOf("."));
             System.out.println("I am here 1");
-            String videoPath = videoPaths.stream().filter(video->video.substring(0,video.lastIndexOf(".")).equals(subtitleName)
-                    && Constants.Files.IGNORE_EXTENSIONS.stream().noneMatch(video::endsWith)).findAny().orElse(null);
+            List<String> videoPathsPathEqual = videoPaths.stream().filter(video->video.substring(0,video.lastIndexOf(".")).equals(subtitleName)).toList();
             System.out.println("I am here 2");
+            String videoPath = videoPathsPathEqual.stream().filter(video->Constants.Files.IGNORE_EXTENSIONS.stream().noneMatch(video::endsWith)).findAny().orElse(null);
+            System.out.println("I am here 3");
             if(counterTxt.get() == 183) System.out.println(videoPath + "; " + textPath);
             saveAsProcessed(videoPath, textPath);
-            System.out.println("I am here 3");
             counterTxt.getAndIncrement();
         });
     }
