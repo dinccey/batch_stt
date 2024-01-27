@@ -140,13 +140,13 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public void saveToProcess(String path){
+        String noExtensionPath = path.substring(0,path.lastIndexOf("."));
         try {
-            if(itemRepository.existsItemByFilePathVideoLike(path)
-                    || Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(path::contains)
+            Item item = itemRepository.findByFilePathVideoStartingWith(path).orElse(null);
+            if(Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(path::contains)
                     || Constants.Files.IGNORE_EXTENSIONS.stream().anyMatch(path::contains)) return;
-            Item item = new Item();
-
-            String processedFilePAth = findProcessedFilePath(path);
+            if(item == null) item = new Item();
+            String processedFilePAth = findProcessedFilePath(noExtensionPath);
             if(processedFilePAth != null){
                 item.setFilePathText(processedFilePAth);
                 item.setProcessingStatus(ProcessingStatus.FINISHED);
@@ -159,10 +159,9 @@ public class FileServiceImpl implements FileService {
     }
 
     private String findProcessedFilePath(String path) {
-        String noExtensionPath = path.substring(0,path.lastIndexOf("."));
         AtomicReference<String> existingFile = new AtomicReference<>();
         Constants.Files.TRANSCRIBE_EXTENSIONS.forEach(transcribeExtension->{
-            String filePath = noExtensionPath+transcribeExtension;
+            String filePath = path+transcribeExtension;
             if(new File(filePath).exists()){
                 existingFile.set(filePath);
             }
