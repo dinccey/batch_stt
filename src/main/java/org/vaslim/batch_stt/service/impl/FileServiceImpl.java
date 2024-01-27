@@ -142,7 +142,7 @@ public class FileServiceImpl implements FileService {
     public void saveToProcess(String path, Set<Item> items, List<Item> allItems){
 
         System.out.println("I am here 1");
-        String noExtensionPath = path.substring(0,path.lastIndexOf(".")).replaceAll("\\P{Print}","");;
+        String noExtensionPath = path.substring(0,path.lastIndexOf(".")).replaceAll("\\P{Print}","");
         try {
             System.out.println("I am here 2");
             if(Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(path::contains)
