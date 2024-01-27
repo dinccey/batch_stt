@@ -93,20 +93,8 @@ public class FileServiceImpl implements FileService {
     protected void saveProcessed(List<String> textPaths, List<String> videoPaths) {
         AtomicInteger counterTxt = new AtomicInteger();
         textPaths.forEach(textPath->{
-            System.out.println("txt counter " + counterTxt.get());
             String subtitleName = textPath.substring(0,textPath.lastIndexOf("."));
-            System.out.println("I am here 1");
-            List<String> videoPathsPathEqual = videoPaths.stream().filter(video->{
-                String basePath = video.substring(0,video.lastIndexOf("."));
-                System.out.println("i am here");
-                return basePath.compareTo(subtitleName) == 0;
-            }).toList();
-            System.out.println("I am here 2");
-            String videoPath = videoPathsPathEqual.stream().findAny().orElse(null);
-            //String videoPath = subtitleName+".mp4";
-            System.out.println("I am here 3");
-            if(counterTxt.get() == 183) System.out.println(videoPath + "; " + textPath);
-            saveAsProcessed(videoPath, textPath);
+            saveAsProcessed(subtitleName, textPath);
             counterTxt.getAndIncrement();
         });
     }
@@ -162,14 +150,14 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public void saveAsProcessed(String videoPath, String outputPath){
-        Optional<Item> item = itemRepository.findByFilePathVideoEquals(videoPath);
+    public void saveAsProcessed(String pathNoExtension, String outputPath){
+        Optional<Item> item = itemRepository.findByFilePathVideoStartingWith(pathNoExtension);
         if(item.isPresent() && outputPath != null){
             try{
                 item.get().setFilePathText(outputPath);
                 item.get().setProcessedTimestamp(LocalDateTime.now());
                 item.get().setProcessingStatus(ProcessingStatus.FINISHED);
-                item.get().setVideoFileName(videoPath.substring(videoPath.lastIndexOf("/")+1));
+                item.get().setVideoFileName(pathNoExtension.substring(pathNoExtension.lastIndexOf("/")+1));
                 counter++;
                 itemRepository.saveAndFlush(item.get());
             } catch (Exception e){
@@ -178,7 +166,7 @@ public class FileServiceImpl implements FileService {
             }
         }
         else{
-            logger.error("Video path to save as processed not found: " + videoPath + " outputPath = " + outputPath);
+            logger.error("Video path to save as processed not found: " + pathNoExtension + " outputPath = " + outputPath);
         }
     }
 
