@@ -14,7 +14,7 @@
 	<name>batch_stt</name>
 	<description>Batch Speech to Text</description>
 	<properties>
-		<java.version>21</java.version>
+		<java.version>20</java.version>
 	</properties>
 	<dependencies>
 		<dependency>
