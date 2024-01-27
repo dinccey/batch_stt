@@ -1,13 +1,13 @@
 package org.vaslim.batch_stt.service;
 
 import org.springframework.stereotype.Service;
+import org.vaslim.batch_stt.model.Item;
 import org.vaslim.whisper_asr.client.api.EndpointsApi;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.file.Path;
+import java.util.Set;
 
 @Service
 public interface FileService {
@@ -21,5 +21,5 @@ public interface FileService {
 
     void saveAsProcessed(String videoPath, String outputPath);
 
-    void saveToProcess(String path);
+    void saveToProcess(String path, Set<Item> items);
 }

@@ -79,11 +79,12 @@ public class FileServiceImpl implements FileService {
             List<String> videoPaths = filePaths.stream().filter(filePath ->  Constants.Files.IGNORE_EXTENSIONS.stream().noneMatch(filePath::endsWith)
                     && Constants.Files.TRANSCRIBE_EXTENSIONS.stream().noneMatch(filePath::endsWith)
                     && !filePath.contains(outputFormat + "+")).toList();
-            videoPaths.forEach(this::saveToProcess);
-            List<String> textPaths = filePaths.stream().filter(filePath -> Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(filePath::endsWith)).toList();
-            logger.info("Found text paths from transcribe extensions: " + textPaths.size());
+            Set<Item> itemsToSave = new HashSet<>();
+            videoPaths.forEach(videoPath->saveToProcess(videoPath, itemsToSave));
+            //List<String> textPaths = filePaths.stream().filter(filePath -> Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(filePath::endsWith)).toList();
+            //logger.info("Found text paths from transcribe extensions: " + textPaths.size());
             //saveProcessed(textPaths);
-
+            itemRepository.saveAllAndFlush(itemsToSave);
         } catch (IOException | NoSuchElementException e) {
             e.printStackTrace();
             throw new BatchSttException(e.getMessage());
@@ -139,7 +140,8 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public void saveToProcess(String path){
+    public void saveToProcess(String path, Set<Item> items){
+
         System.out.println("I am here 1");
         String noExtensionPath = path.substring(0,path.lastIndexOf("."));
         try {
@@ -158,7 +160,7 @@ public class FileServiceImpl implements FileService {
             }
             System.out.println("I am here 6");
             item.setFilePathVideo(path);
-            itemRepository.saveAndFlush(item);
+            items.add(item);
         } catch (Exception e){
             throw new BatchSttException(e.getMessage());
         }
