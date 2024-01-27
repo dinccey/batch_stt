@@ -95,15 +95,15 @@ public class FileServiceImpl implements FileService {
         textPaths.forEach(textPath->{
             System.out.println("txt counter " + counterTxt.get());
             String subtitleName = textPath.substring(0,textPath.lastIndexOf("."));
-            //System.out.println("I am here 1");
+            System.out.println("I am here 1");
             List<String> videoPathsPathEqual = videoPaths.stream().filter(video->{
                 String basePath = video.substring(0,video.lastIndexOf("."));
                 return basePath.compareTo(subtitleName) == 0;
             }).toList();
-            //System.out.println("I am here 2");
+            System.out.println("I am here 2");
             String videoPath = videoPathsPathEqual.stream().findAny().orElse(null);
             //String videoPath = subtitleName+".mp4";
-            //System.out.println("I am here 3");
+            System.out.println("I am here 3");
             if(counterTxt.get() == 183) System.out.println(videoPath + "; " + textPath);
             saveAsProcessed(videoPath, textPath);
             counterTxt.getAndIncrement();
