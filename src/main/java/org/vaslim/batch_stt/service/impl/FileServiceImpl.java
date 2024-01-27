@@ -79,7 +79,10 @@ public class FileServiceImpl implements FileService {
                     && Constants.Files.TRANSCRIBE_EXTENSIONS.stream().noneMatch(filePath::endsWith)
                     && !filePath.contains(outputFormat + "+")).toList();
             Set<Item> itemsToSave = new HashSet<>();
-            videoPaths.forEach(videoPath->saveToProcess(videoPath, itemsToSave, allItems));
+            for(String videoPath: videoPaths){
+                saveToProcess(videoPath, itemsToSave, allItems);
+            }
+            //videoPaths.forEach(videoPath->saveToProcess(videoPath, itemsToSave, allItems));
             //List<String> textPaths = filePaths.stream().filter(filePath -> Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(filePath::endsWith)).toList();
             //logger.info("Found text paths from transcribe extensions: " + textPaths.size());
             //saveProcessed(textPaths);
