@@ -119,10 +119,10 @@ public class WhisperClientServiceImpl implements WhisperClientService {
         File directory = new File(filesystemPath);
         String[] directories = directory.list((current, name) -> new File(current, name).isDirectory());
         if (directories != null) {
-            for (String dir : directories) {
-                System.out.println(directory+ "/"+ dir);
-                fileService.findUnprocessedFiles(Path.of(directory+ "/"+ dir));
-            }
+//            for (String dir : directories) {
+//                System.out.println(directory+ "/"+ dir);
+//                fileService.findUnprocessedFiles(Path.of(directory+ "/"+ dir));
+//            }
             fileService.findUnprocessedFiles(Path.of(directory.getAbsolutePath()));
         }
         logger.info("Done finding files.");
