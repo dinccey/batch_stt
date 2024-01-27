@@ -154,6 +154,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public void saveAsProcessed(String pathNoExtension, String outputPath){
+        System.out.println("I am here 2+");
         Optional<Item> item = itemRepository.findByFilePathVideoStartingWith(pathNoExtension);
         System.out.println("I am here 4");
         if(item.isPresent() && outputPath != null){
