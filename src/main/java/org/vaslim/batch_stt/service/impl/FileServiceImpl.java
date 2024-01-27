@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Stream;
 
 @Service
@@ -81,8 +82,7 @@ public class FileServiceImpl implements FileService {
             videoPaths.forEach(this::saveToProcess);
             List<String> textPaths = filePaths.stream().filter(filePath -> Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(filePath::endsWith)).toList();
             logger.info("Found text paths from transcribe extensions: " + textPaths.size());
-            saveProcessed(textPaths);
-            logger.info("Number of files that are saved as processed: " + counter);
+            //saveProcessed(textPaths);
 
         } catch (IOException | NoSuchElementException e) {
             e.printStackTrace();
@@ -145,11 +145,29 @@ public class FileServiceImpl implements FileService {
                     || Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(path::contains)
                     || Constants.Files.IGNORE_EXTENSIONS.stream().anyMatch(path::contains)) return;
             Item item = new Item();
+
+            String processedFilePAth = findProcessedFilePath(path);
+            if(processedFilePAth != null){
+                item.setFilePathText(processedFilePAth);
+                item.setProcessingStatus(ProcessingStatus.FINISHED);
+            }
             item.setFilePathVideo(path);
             itemRepository.save(item);
         } catch (Exception e){
             throw new BatchSttException(e.getMessage());
         }
+    }
+
+    private String findProcessedFilePath(String path) {
+        String noExtensionPath = path.substring(0,path.lastIndexOf("."));
+        AtomicReference<String> existingFile = new AtomicReference<>();
+        Constants.Files.TRANSCRIBE_EXTENSIONS.forEach(transcribeExtension->{
+            String filePath = noExtensionPath+transcribeExtension;
+            if(new File(filePath).exists()){
+                existingFile.set(filePath);
+            }
+        });
+        return existingFile.get();
     }
 
     @Override
