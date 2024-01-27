@@ -98,7 +98,7 @@ public class FileServiceImpl implements FileService {
             System.out.println("I am here 1");
             List<String> videoPathsPathEqual = videoPaths.stream().filter(video->{
                 String basePath = video.substring(0,video.lastIndexOf("."));
-                System.out.print("");
+                System.out.println("i am here");
                 return basePath.compareTo(subtitleName) == 0;
             }).toList();
             System.out.println("I am here 2");
