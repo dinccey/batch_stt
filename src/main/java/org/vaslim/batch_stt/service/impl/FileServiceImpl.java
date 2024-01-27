@@ -7,7 +7,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.vaslim.batch_stt.constants.Constants;
 import org.vaslim.batch_stt.enums.ProcessingStatus;
 import org.vaslim.batch_stt.exception.BatchSttException;
@@ -62,7 +61,6 @@ public class FileServiceImpl implements FileService {
         return file;
     }
 
-    @Transactional
     @Override
     public void findUnprocessedFiles(Path path) {
         try (Stream<Path> paths = Files.walk(path)) {
