@@ -140,17 +140,23 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public void saveToProcess(String path){
+        System.out.println("I am here 1");
         String noExtensionPath = path.substring(0,path.lastIndexOf("."));
         try {
-            Item item = itemRepository.findByFilePathVideoStartingWith(path).orElse(null);
+            System.out.println("I am here 2");
             if(Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(path::contains)
                     || Constants.Files.IGNORE_EXTENSIONS.stream().anyMatch(path::contains)) return;
+            System.out.println("I am here 3");
+            Item item = itemRepository.findByFilePathVideoStartingWith(noExtensionPath).orElse(null);
+            System.out.println("I am here 4");
             if(item == null) item = new Item();
             String processedFilePAth = findProcessedFilePath(noExtensionPath);
+            System.out.println("I am here 5");
             if(processedFilePAth != null){
                 item.setFilePathText(processedFilePAth);
                 item.setProcessingStatus(ProcessingStatus.FINISHED);
             }
+            System.out.println("I am here 6");
             item.setFilePathVideo(path);
             itemRepository.save(item);
         } catch (Exception e){
