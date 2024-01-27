@@ -7,6 +7,7 @@ import org.vaslim.whisper_asr.client.api.EndpointsApi;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -21,5 +22,5 @@ public interface FileService {
 
     void saveAsProcessed(String videoPath, String outputPath);
 
-    void saveToProcess(String path, Set<Item> items);
+    void saveToProcess(String path, Set<Item> items, List<Item> allItems);
 }

@@ -65,6 +65,7 @@ public class FileServiceImpl implements FileService {
     public void findUnprocessedFiles(Path path) {
         try (Stream<Path> paths = Files.walk(path)) {
             deleteExcludedItemsFromDb(excludedPaths);
+            List<Item> allItems = itemRepository.findAll();
             List<Path> fileList = paths.filter(Files::isRegularFile).toList();
             Set<String> filePaths = new HashSet<>();
             for (Path filePath : fileList) {
@@ -78,7 +79,7 @@ public class FileServiceImpl implements FileService {
                     && Constants.Files.TRANSCRIBE_EXTENSIONS.stream().noneMatch(filePath::endsWith)
                     && !filePath.contains(outputFormat + "+")).toList();
             Set<Item> itemsToSave = new HashSet<>();
-            videoPaths.forEach(videoPath->saveToProcess(videoPath, itemsToSave));
+            videoPaths.forEach(videoPath->saveToProcess(videoPath, itemsToSave, allItems));
             //List<String> textPaths = filePaths.stream().filter(filePath -> Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(filePath::endsWith)).toList();
             //logger.info("Found text paths from transcribe extensions: " + textPaths.size());
             //saveProcessed(textPaths);
@@ -138,7 +139,7 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public void saveToProcess(String path, Set<Item> items){
+    public void saveToProcess(String path, Set<Item> items, List<Item> allItems){
 
         System.out.println("I am here 1");
         String noExtensionPath = path.substring(0,path.lastIndexOf(".")).replaceAll("\\P{Print}","");;
@@ -147,7 +148,8 @@ public class FileServiceImpl implements FileService {
             if(Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(path::contains)
                     || Constants.Files.IGNORE_EXTENSIONS.stream().anyMatch(path::contains)) return;
             System.out.println("I am here 3" + noExtensionPath);
-            Item item = itemRepository.findByFilePathVideoStartingWith(noExtensionPath).orElse(null);
+            //Item item = itemRepository.findByFilePathVideoStartingWith(noExtensionPath).orElse(null);
+            Item item = allItems.stream().filter(i->i.getFilePathVideo().startsWith(noExtensionPath)).findAny().orElse(null);
             System.out.println("I am here 4");
             if(item == null) item = new Item();
             String processedFilePAth = findProcessedFilePath(noExtensionPath);
