@@ -95,7 +95,7 @@ public class FileServiceImpl implements FileService {
         textPaths.forEach(textPath->{
             System.out.println("I am here 1");
             String subtitleName = textPath.substring(0,textPath.lastIndexOf("."));
-            System.out.println("I am here 2");
+            System.out.println("I am here 2 " + textPath);
             saveAsProcessed(subtitleName, textPath);
             System.out.println("I am here 3");
             counterTxt.getAndIncrement();
