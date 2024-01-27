@@ -146,7 +146,7 @@ public class FileServiceImpl implements FileService {
             System.out.println("I am here 2");
             if(Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(path::contains)
                     || Constants.Files.IGNORE_EXTENSIONS.stream().anyMatch(path::contains)) return;
-            System.out.println("I am here 3");
+            System.out.println("I am here 3" + noExtensionPath);
             Item item = itemRepository.findByFilePathVideoStartingWith(noExtensionPath).orElse(null);
             System.out.println("I am here 4");
             if(item == null) item = new Item();
@@ -158,7 +158,7 @@ public class FileServiceImpl implements FileService {
             }
             System.out.println("I am here 6");
             item.setFilePathVideo(path);
-            itemRepository.save(item);
+            itemRepository.saveAndFlush(item);
         } catch (Exception e){
             throw new BatchSttException(e.getMessage());
         }
