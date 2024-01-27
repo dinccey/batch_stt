@@ -8,7 +8,7 @@ COPY src ./src
 RUN mvn package -Dmaven.test.skip
 
 # Second stage: run the jar using Corretto
-FROM amazoncorretto:20-al2023-headful
+FROM amazoncorretto:20-al2-full
 COPY --from=pkg /app/target/*.jar app.jar
 RUN mkdir /mnt/ftp
 EXPOSE 8080
