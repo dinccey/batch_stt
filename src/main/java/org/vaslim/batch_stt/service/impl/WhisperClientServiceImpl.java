@@ -16,7 +16,6 @@ import org.vaslim.batch_stt.service.WhisperClientService;
 import org.vaslim.whisper_asr.client.api.EndpointsApi;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -74,7 +73,7 @@ public class WhisperClientServiceImpl implements WhisperClientService {
                         fileService.processFile(audioFile, outputFileNamePath, endpointsApi[0]);
                         endTime = System.currentTimeMillis();
                         if (new File(outputFileNamePath).exists()){
-                            fileService.saveAsProcessed(videoPath , outputFileNamePath);
+                            fileService.saveAsProcessed(outputFileNamePath);
                             statisticsService.incrementProcessedItemsPerInstance(endpointsApi[0].getApiClient().getBasePath());
                             statisticsService.incrementTotalProcessingTimePerInstance(endpointsApi[0].getApiClient().getBasePath(),endTime - startTime);
                         }
@@ -114,19 +113,6 @@ public class WhisperClientServiceImpl implements WhisperClientService {
         }
     }
 
-    @Override
-    public void findUnprocessedFiles() {
-        File directory = new File(filesystemPath);
-        String[] directories = directory.list((current, name) -> new File(current, name).isDirectory());
-        if (directories != null) {
-//            for (String dir : directories) {
-//                System.out.println(directory+ "/"+ dir);
-//                fileService.findUnprocessedFiles(Path.of(directory+ "/"+ dir));
-//            }
-            fileService.findUnprocessedFiles(Path.of(directory.getAbsolutePath()));
-        }
-        logger.info("Done finding files.");
-    }
 
     private void sleepMilis(Long milis){
         try {

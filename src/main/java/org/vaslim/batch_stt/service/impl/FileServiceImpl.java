@@ -12,19 +12,14 @@ import org.vaslim.batch_stt.enums.ProcessingStatus;
 import org.vaslim.batch_stt.exception.BatchSttException;
 import org.vaslim.batch_stt.model.Item;
 import org.vaslim.batch_stt.repository.ItemRepository;
+import org.vaslim.batch_stt.service.FileScanService;
 import org.vaslim.batch_stt.service.FileService;
 import org.vaslim.whisper_asr.client.api.EndpointsApi;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.stream.Stream;
+import java.util.List;
 
 @Service
 public class FileServiceImpl implements FileService {
@@ -35,7 +30,7 @@ public class FileServiceImpl implements FileService {
 
     private final ItemRepository itemRepository;
 
-    private int counter = 0;
+    private final FileScanService fileScanService;
 
     @Value("${output.format}")
     private String outputFormat;
@@ -46,8 +41,9 @@ public class FileServiceImpl implements FileService {
     @Value("${excluded.paths}")
     private String[] excludedPaths;
 
-    public FileServiceImpl(ItemRepository itemRepository) {
+    public FileServiceImpl(ItemRepository itemRepository, FileScanService fileScanService) {
         this.itemRepository = itemRepository;
+        this.fileScanService = fileScanService;
     }
 
     @Override
@@ -62,47 +58,69 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public void findUnprocessedFiles(Path path) {
-        try (Stream<Path> paths = Files.walk(path)) {
-            deleteExcludedItemsFromDb(excludedPaths);
-            List<Item> allItems = itemRepository.findAll();
-            List<Path> fileList = paths.filter(Files::isRegularFile).toList();
-            Set<String> filePaths = new HashSet<>();
-            for (Path filePath : fileList) {
-                if(Arrays.stream(excludedPaths).noneMatch(filePath::startsWith)){
-                    filePaths.add(filePath.toString());
+    public void findUnprocessedFiles() {
+        deleteExcludedItemsFromDb(excludedPaths);
+        List<File> nextFiles;
+        do{
+            nextFiles = fileScanService.getNext();
+            nextFiles.forEach(file -> {
+                if(file.isFile() && Constants.Files.IGNORE_EXTENSIONS.stream().noneMatch(file.getName()::endsWith)){
+                    try {
+                        if (Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(file.getName()::endsWith)){
+
+                            saveAsProcessed(file.getAbsolutePath());
+                        } else {
+                            saveToProcess(file.getAbsolutePath());
+                        }
+                    } catch (Exception e){
+                        logger.error(e.getMessage());
+                    }
                 }
-            }
-            logger.info("Number of filePaths: " + filePaths.size());
-            //check that filePath doesn't end with text file extension or that it is a backup of the word filter
-            List<String> videoPaths = filePaths.stream().filter(filePath ->  Constants.Files.IGNORE_EXTENSIONS.stream().noneMatch(filePath::endsWith)
-                    && Constants.Files.TRANSCRIBE_EXTENSIONS.stream().noneMatch(filePath::endsWith)
-                    && !filePath.contains(outputFormat + "+")).toList();
-            Set<Item> itemsToSave = new HashSet<>();
-            for(String videoPath: videoPaths){
-                saveToProcess(videoPath, itemsToSave, allItems);
-            }
-            //videoPaths.forEach(videoPath->saveToProcess(videoPath, itemsToSave, allItems));
-            //List<String> textPaths = filePaths.stream().filter(filePath -> Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(filePath::endsWith)).toList();
-            //logger.info("Found text paths from transcribe extensions: " + textPaths.size());
-            //saveProcessed(textPaths);
-            itemRepository.saveAllAndFlush(itemsToSave);
-        } catch (IOException | NoSuchElementException e) {
-            e.printStackTrace();
+
+            });
+            itemRepository.flush();
+
+        } while (!nextFiles.isEmpty());
+        fileScanService.reset();
+    }
+
+    @Override
+    public void saveAsProcessed(String path) {
+        System.out.println("I am here 21");
+        try {
+            String noExtensionPath = path.substring(0,path.lastIndexOf("."));
+            System.out.println("I am here 22");
+            System.out.println("I am here 23" + noExtensionPath);
+            Item item = itemRepository.findByFilePathVideoStartingWith(noExtensionPath).orElse(null);
+            System.out.println("I am here 24");
+            if(item == null) return;
+            System.out.println("I am here 25");
+            item.setFilePathText(path);
+            item.setProcessingStatus(ProcessingStatus.FINISHED);
+            System.out.println("I am here 26");
+            itemRepository.save(item);
+        } catch (Exception e){
             throw new BatchSttException(e.getMessage());
         }
     }
 
-    protected void saveProcessed(List<String> textPaths) {
-        AtomicInteger counterTxt = new AtomicInteger();
-        textPaths.forEach(textPath->{
-            System.out.println("I am here 1");
-            String subtitleName = textPath.substring(0,textPath.lastIndexOf("."));
-            System.out.println("I am here 2 " + textPath + " ; " + subtitleName);
-            saveAsProcessed(subtitleName, textPath);
-            System.out.println("I am here 3");
-            counterTxt.getAndIncrement();
-        });
+    @Override
+    public void saveToProcess(String path){
+
+        System.out.println("I am here 1");
+        try {
+            String noExtensionPath = path.substring(0,path.lastIndexOf("."));
+            System.out.println("I am here 2");
+            System.out.println("I am here 3" + noExtensionPath);
+            Item item = new Item();
+            System.out.println("I am here 4");
+            System.out.println("I am here 5");
+            System.out.println("I am here 6");
+            item.setFilePathVideo(path);
+            itemRepository.save(item);
+        } catch (Exception e){
+            throw new BatchSttException(e.getMessage());
+        }
     }
 
     @Override
@@ -139,72 +157,6 @@ public class FileServiceImpl implements FileService {
         }
         System.out.println("Audio extracted successfully!");
         return audioFile;
-    }
-
-    @Override
-    public void saveToProcess(String path, Set<Item> items, List<Item> allItems){
-
-        System.out.println("I am here 1");
-        String noExtensionPath = path.substring(0,path.lastIndexOf("."));
-        try {
-            System.out.println("I am here 2");
-            if(Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(path::contains)
-                    || Constants.Files.IGNORE_EXTENSIONS.stream().anyMatch(path::contains)) return;
-            System.out.println("I am here 3" + noExtensionPath);
-            //Item item = itemRepository.findByFilePathVideoStartingWith(noExtensionPath).orElse(null);
-            Item item = allItems.stream().filter(i->i.getFilePathVideo().startsWith(noExtensionPath)).findAny().orElse(null);
-            System.out.println("I am here 4");
-            if(item == null) item = new Item();
-            String processedFilePAth = findProcessedFilePath(noExtensionPath);
-            System.out.println("I am here 5");
-            if(processedFilePAth != null){
-                item.setFilePathText(processedFilePAth);
-                item.setProcessingStatus(ProcessingStatus.FINISHED);
-            }
-            System.out.println("I am here 6");
-            item.setFilePathVideo(path);
-            items.add(item);
-        } catch (Exception e){
-            throw new BatchSttException(e.getMessage());
-        }
-    }
-
-    private String findProcessedFilePath(String path) {
-        AtomicReference<String> existingFile = new AtomicReference<>();
-        Constants.Files.TRANSCRIBE_EXTENSIONS.forEach(transcribeExtension->{
-            String filePath = path+transcribeExtension;
-            if(new File(filePath).exists()){
-                existingFile.set(filePath);
-            }
-        });
-        return existingFile.get();
-    }
-
-    @Override
-    public void saveAsProcessed(String pathNoExtension, String outputPath){
-        System.out.println("I am here 2+");
-        Optional<Item> item = itemRepository.findByFilePathVideoStartingWith(pathNoExtension.trim());
-        System.out.println("I am here 4");
-        if(item.isPresent() && outputPath != null){
-            try{
-                System.out.println("I am here 5");
-                item.get().setFilePathText(outputPath);
-                item.get().setProcessedTimestamp(LocalDateTime.now());
-                item.get().setProcessingStatus(ProcessingStatus.FINISHED);
-                System.out.println("I am here 6");
-                item.get().setVideoFileName(pathNoExtension.substring(pathNoExtension.lastIndexOf("/")+1));
-                counter++;
-                System.out.println("I am here 7");
-                itemRepository.saveAndFlush(item.get());
-                System.out.println("I am here 8");
-            } catch (Exception e){
-                e.printStackTrace();
-                logger.error(e.getMessage());
-            }
-        }
-        else{
-            logger.error("Video path to save as processed not found: " + pathNoExtension + " outputPath = " + outputPath);
-        }
     }
 
     public void deleteExcludedItemsFromDb(String[] excludedPaths){
