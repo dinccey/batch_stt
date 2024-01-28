@@ -26,7 +26,6 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     Integer countItemByFilePathTextIsNotNull();
 
     Integer countItemsByFilePathVideoEndingWith(String extension);
-    Integer countItems();
 
     @Transactional
     void deleteItemByFilePathVideoStartingWith(String excludedPath);
