@@ -60,16 +60,20 @@ public class FileServiceImpl implements FileService {
     @Override
     public void findUnprocessedFiles() {
         deleteExcludedItemsFromDb(excludedPaths);
+        scanFiles();
+        fileScanService.reset();
+        scanProcessedFiles();
+        fileScanService.reset();
+    }
+
+    private void scanFiles() {
         List<File> nextFiles;
         do{
             nextFiles = fileScanService.getNext();
             nextFiles.forEach(file -> {
                 if(file.isFile() && Constants.Files.IGNORE_EXTENSIONS.stream().noneMatch(file.getName()::endsWith)){
                     try {
-                        if (Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(file.getName()::endsWith)){
-
-                            saveAsProcessed(file.getAbsolutePath());
-                        } else {
+                        if (Constants.Files.TRANSCRIBE_EXTENSIONS.stream().noneMatch(file.getName()::endsWith)){
                             saveToProcess(file.getAbsolutePath());
                         }
                     } catch (Exception e){
@@ -81,7 +85,27 @@ public class FileServiceImpl implements FileService {
             itemRepository.flush();
 
         } while (!nextFiles.isEmpty());
-        fileScanService.reset();
+    }
+
+    private void scanProcessedFiles() {
+        List<File> nextFiles;
+        do{
+            nextFiles = fileScanService.getNext();
+            nextFiles.forEach(file -> {
+                if(file.isFile() && Constants.Files.IGNORE_EXTENSIONS.stream().noneMatch(file.getName()::endsWith)){
+                    try {
+                        if (Constants.Files.TRANSCRIBE_EXTENSIONS.stream().anyMatch(file.getName()::endsWith)){
+                            saveAsProcessed(file.getAbsolutePath());
+                        }
+                    } catch (Exception e){
+                        logger.error(e.getMessage());
+                    }
+                }
+
+            });
+            itemRepository.flush();
+
+        } while (!nextFiles.isEmpty());
     }
 
     @Override
