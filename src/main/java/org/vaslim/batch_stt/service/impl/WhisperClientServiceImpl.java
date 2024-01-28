@@ -106,7 +106,7 @@ public class WhisperClientServiceImpl implements WhisperClientService {
 
     private void updateItemStatus(File videoFile, ProcessingStatus processingStatus) {
         String fileVideoPathNoExtension = videoFile.getAbsolutePath().substring(0,videoFile.getAbsolutePath().lastIndexOf("."));
-        Optional<Item> item = itemRepository.findByFilePathVideoStartingWith(fileVideoPathNoExtension);
+        Optional<Item> item = itemRepository.findByFilePathVideoStartingWith(fileVideoPathNoExtension+".");
         if(item.isPresent()){
             item.get().setProcessingStatus(processingStatus);
             itemRepository.save(item.get());

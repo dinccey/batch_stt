@@ -115,7 +115,7 @@ public class FileServiceImpl implements FileService {
             String noExtensionPath = path.substring(0,path.lastIndexOf("."));
             System.out.println("I am here 22");
             System.out.println("I am here 23" + noExtensionPath);
-            Item item = itemRepository.findByFilePathVideoStartingWith(noExtensionPath).orElse(null);
+            Item item = itemRepository.findByFilePathVideoStartingWith(noExtensionPath+".").orElse(null);
             System.out.println("I am here 24");
             if(item == null) return;
             System.out.println("I am here 25");
