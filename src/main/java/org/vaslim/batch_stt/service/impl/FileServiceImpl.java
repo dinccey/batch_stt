@@ -64,6 +64,8 @@ public class FileServiceImpl implements FileService {
         fileScanService.reset();
         scanProcessedFiles();
         fileScanService.reset();
+        logger.info("Total items count with extension .mp4 " + itemRepository.countItemsByFilePathVideoEndingWith(".mp4"));
+        logger.info("Total items count: " + itemRepository.countItems());
     }
 
     private void scanFiles() {
@@ -110,18 +112,12 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public void saveAsProcessed(String path) {
-        System.out.println("I am here 21");
         try {
             String noExtensionPath = path.substring(0,path.lastIndexOf("."));
-            System.out.println("I am here 22");
-            System.out.println("I am here 23" + noExtensionPath);
             Item item = itemRepository.findByFilePathVideoStartingWith(noExtensionPath+".").orElse(null);
-            System.out.println("I am here 24");
             if(item == null) return;
-            System.out.println("I am here 25");
             item.setFilePathText(path);
             item.setProcessingStatus(ProcessingStatus.FINISHED);
-            System.out.println("I am here 26");
             itemRepository.save(item);
         } catch (Exception e){
             throw new BatchSttException(e.getMessage());
@@ -131,15 +127,8 @@ public class FileServiceImpl implements FileService {
     @Override
     public void saveToProcess(String path){
 
-        System.out.println("I am here 1");
         try {
-            String noExtensionPath = path.substring(0,path.lastIndexOf("."));
-            System.out.println("I am here 2");
-            System.out.println("I am here 3" + noExtensionPath);
             Item item = new Item();
-            System.out.println("I am here 4");
-            System.out.println("I am here 5");
-            System.out.println("I am here 6");
             item.setFilePathVideo(path);
             itemRepository.save(item);
         } catch (Exception e){
