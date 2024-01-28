@@ -8,6 +8,7 @@ import org.vaslim.batch_stt.model.Item;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Long> {
@@ -26,6 +27,7 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
     Integer countItemByFilePathTextIsNotNull();
 
     Integer countItemsByFilePathVideoEndingWith(String extension);
+    Set<Item> countItemsByFilePathVideoNotContaining(String extension);
 
     @Transactional
     void deleteItemByFilePathVideoStartingWith(String excludedPath);

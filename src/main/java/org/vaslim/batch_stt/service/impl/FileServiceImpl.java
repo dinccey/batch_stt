@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class FileServiceImpl implements FileService {
@@ -65,6 +66,10 @@ public class FileServiceImpl implements FileService {
         scanProcessedFiles();
         fileScanService.reset();
         logger.info("Total items count with extension .mp4 " + itemRepository.countItemsByFilePathVideoEndingWith(".mp4"));
+        Set<Item> items = itemRepository.countItemsByFilePathVideoNotContaining(".mp4");
+        items.forEach(item -> {
+            logger.info("Extra item?: " + item.getFilePathVideo());
+        });
     }
 
     private void scanFiles() {
