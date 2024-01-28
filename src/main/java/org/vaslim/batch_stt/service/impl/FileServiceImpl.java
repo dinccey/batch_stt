@@ -78,7 +78,7 @@ public class FileServiceImpl implements FileService {
                             saveToProcess(file.getAbsolutePath());
                         }
                     } catch (Exception e){
-                        logger.error(e.getMessage());
+                        //logger.error(e.getMessage());
                     }
                 }
 
@@ -99,7 +99,7 @@ public class FileServiceImpl implements FileService {
                             saveAsProcessed(file.getAbsolutePath());
                         }
                     } catch (Exception e){
-                        logger.error(e.getMessage());
+                        //logger.error(e.getMessage());
                     }
                 }
 
