@@ -73,7 +73,7 @@ public class InferenceInstanceOnlineCheckScheduledTask {
         connectionPool.refreshUrlsFromDatabase();
     }
 
-    @Scheduled(cron = "0 */5 * * * *")
+    //@Scheduled(cron = "0 */5 * * * *")
     public void cleanupZombieInstances(){
         //if connection is lost during inference, an instance will remain stuck as being used while it is available
         Set<String> instanceIds = inferenceInstanceRepository.findAll().stream().map(InferenceInstance::getInstanceUrl).collect(Collectors.toSet());
