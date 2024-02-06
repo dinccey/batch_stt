@@ -79,14 +79,14 @@ public class WhisperClientServiceImpl implements WhisperClientService {
                         }
                         connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
                     } catch (Exception e) {
-                        logger.warn("Inference failed with exception: " + e.getMessage());
+                        logger.warn("Inference failed with exception: " + e.getMessage() + " for " + videoPath);
                         updateItemStatus(videoFile, ProcessingStatus.PENDING);
                         updateInferenceInstanceOnFailure(endpointsApi);
                         connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
 
                     }
                 } catch (Exception e) {
-                    logger.warn("Inference failed with exception: " + e.getMessage());
+                    logger.warn("Inference failed with exception: " + e.getMessage() + " for " + videoPath);
                     updateItemStatus(videoFile, ProcessingStatus.PENDING);
                     updateInferenceInstanceOnFailure(endpointsApi);
                     connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
@@ -105,11 +105,15 @@ public class WhisperClientServiceImpl implements WhisperClientService {
     }
 
     private void updateItemStatus(File videoFile, ProcessingStatus processingStatus) {
-        String fileVideoPathNoExtension = videoFile.getAbsolutePath().substring(0,videoFile.getAbsolutePath().lastIndexOf("."));
-        Optional<Item> item = itemRepository.findByFilePathVideoStartingWith(fileVideoPathNoExtension+".");
-        if(item.isPresent()){
-            item.get().setProcessingStatus(processingStatus);
-            itemRepository.save(item.get());
+        try{
+            String fileVideoPathNoExtension = videoFile.getAbsolutePath().substring(0,videoFile.getAbsolutePath().lastIndexOf("."));
+            Optional<Item> item = itemRepository.findByFilePathVideoStartingWith(fileVideoPathNoExtension+".");
+            if(item.isPresent()){
+                item.get().setProcessingStatus(processingStatus);
+                itemRepository.save(item.get());
+            }
+        } catch (Exception e){
+            logger.error(e.getMessage() + " for file: " + videoFile.getAbsolutePath());
         }
     }
 
