@@ -19,6 +19,7 @@ import org.vaslim.whisper_asr.client.api.EndpointsApi;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -77,7 +78,8 @@ public class FileServiceImpl implements FileService {
         do{
             nextFiles = fileScanService.getNext();
             nextFiles.forEach(file -> {
-                if(file.isFile() && Constants.Files.IGNORE_EXTENSIONS.stream().noneMatch(file.getName()::endsWith)){
+                if(file.isFile() && Constants.Files.IGNORE_EXTENSIONS.stream().noneMatch(file.getName()::endsWith)
+                        && Arrays.stream(excludedPaths).noneMatch(file.getAbsolutePath()::startsWith)){
                     try {
                         if (Constants.Files.TRANSCRIBE_EXTENSIONS.stream().noneMatch(file.getName()::endsWith)){
                             saveToProcess(file.getAbsolutePath());
