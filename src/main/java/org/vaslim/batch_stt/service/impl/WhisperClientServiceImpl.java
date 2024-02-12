@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.vaslim.batch_stt.enums.ProcessingStatus;
+import org.vaslim.batch_stt.exception.BatchSttException;
 import org.vaslim.batch_stt.model.InferenceInstance;
 import org.vaslim.batch_stt.model.Item;
 import org.vaslim.batch_stt.pool.ConnectionPool;
@@ -70,6 +71,8 @@ public class WhisperClientServiceImpl implements WhisperClientService {
                     long startTime = System.currentTimeMillis();
                     long endTime;
                     try {
+                        if(itemRepository.findById(item.getId()).get().getFilePathText() != null) throw new BatchSttException("Item " + item.getFilePathVideo() + " already processed");
+
                         fileService.processFile(audioFile, outputFileNamePath, endpointsApi[0]);
                         endTime = System.currentTimeMillis();
                         if (new File(outputFileNamePath).exists()){
@@ -110,7 +113,7 @@ public class WhisperClientServiceImpl implements WhisperClientService {
             Optional<Item> item = itemRepository.findByFilePathVideoStartingWith(fileVideoPathNoExtension+".");
             if(item.isPresent()){
                 item.get().setProcessingStatus(processingStatus);
-                itemRepository.save(item.get());
+                itemRepository.saveAndFlush(item.get());
             }
         } catch (Exception e){
             logger.error(e.getMessage() + " for file: " + videoFile.getAbsolutePath());
