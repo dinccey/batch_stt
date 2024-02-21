@@ -17,6 +17,6 @@ public interface Constants
 
     interface Files {
         List<String> TRANSCRIBE_EXTENSIONS = List.of(".srt",".vtt",".txt",".json",".tsv");
-        List<String> IGNORE_EXTENSIONS = List.of("mp3","zip","jpg","png","tar");
+        List<String> IGNORE_EXTENSIONS = List.of("mp3","zip","jpg","png","tar", "gz", "pdf");
     }
 }

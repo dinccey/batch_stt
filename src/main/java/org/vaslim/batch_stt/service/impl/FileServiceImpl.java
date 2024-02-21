@@ -67,9 +67,9 @@ public class FileServiceImpl implements FileService {
         scanProcessedFiles();
         fileScanService.reset();
         logger.info("Total items count with extension .mp4 " + itemRepository.countItemsByFilePathVideoEndingWith(".mp4"));
-        Set<Item> items = itemRepository.countItemsByFilePathVideoNotContaining(".mp4");
+        Set<Item> items = itemRepository.findItemsByFilePathVideoNotContaining(".mp4");
         items.forEach(item -> {
-            logger.info("Extra item?: " + item.getFilePathVideo());
+            logger.info("Extra item?: " + item.getFilePathVideo() + " with ID: " + item.getId());
         });
     }
 
