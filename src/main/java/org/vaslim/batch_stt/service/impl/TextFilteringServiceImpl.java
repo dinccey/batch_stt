@@ -1,5 +1,7 @@
 package org.vaslim.batch_stt.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.vaslim.batch_stt.model.Item;
 import org.vaslim.batch_stt.repository.ItemRepository;
@@ -20,6 +22,8 @@ import java.util.Map;
 @Service
 public class TextFilteringServiceImpl implements TextFilteringService {
 
+
+    private static final Logger logger = LoggerFactory.getLogger(TextFilteringServiceImpl.class);
     private final ItemRepository itemRepository;
 
     public TextFilteringServiceImpl(ItemRepository itemRepository) {
@@ -28,6 +32,7 @@ public class TextFilteringServiceImpl implements TextFilteringService {
 
     @Override
     public void processTextFiles(Map<String, String> filterMap) {
+        if(filterMap.isEmpty()) return;
         String hash = generateFilterMapHash(filterMap);
         List<Item> itemsToProcess = itemRepository.findByTextFilterHashNotLikeOrTextFilterHashIsNull(hash);
 
@@ -67,7 +72,7 @@ public class TextFilteringServiceImpl implements TextFilteringService {
                 }
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            logger.warn("Could not load text filtering map.");
         }
         return map;
     }

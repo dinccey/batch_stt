@@ -19,10 +19,10 @@ public class InferenceInstance {
     private Boolean available;
 
     @Column
-    private Integer itemsProcessed = 0;
+    private Integer itemsProcessed;
 
     @Column
-    private Integer failedRunsCount = 0;
+    private Integer failedRunsCount;
 
     @Column
     private Long totalProcessingTimeSeconds;
@@ -56,6 +56,7 @@ public class InferenceInstance {
     }
 
     public Boolean getAvailable() {
+        if (available == null) return false;
         return available;
     }
 
@@ -64,6 +65,7 @@ public class InferenceInstance {
     }
 
     public Integer getItemsProcessed() {
+        if(itemsProcessed == null) return 0;
         return itemsProcessed;
     }
 
@@ -72,6 +74,7 @@ public class InferenceInstance {
     }
 
     public Integer getFailedRunsCount() {
+        if(failedRunsCount == null) return 0;
         return failedRunsCount;
     }
 
@@ -80,6 +83,7 @@ public class InferenceInstance {
     }
 
     public Long getTotalProcessingTimeSeconds() {
+        if(totalProcessingTimeSeconds == null) return 0L;
         return totalProcessingTimeSeconds;
     }
 

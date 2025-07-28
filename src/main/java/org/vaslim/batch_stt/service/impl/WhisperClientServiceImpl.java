@@ -1,8 +1,11 @@
 package org.vaslim.batch_stt.service.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.vaslim.batch_stt.enums.ProcessingStatus;
+import org.vaslim.batch_stt.exception.BatchSttException;
 import org.vaslim.batch_stt.model.InferenceInstance;
 import org.vaslim.batch_stt.model.Item;
 import org.vaslim.batch_stt.pool.ConnectionPool;
@@ -14,7 +17,6 @@ import org.vaslim.batch_stt.service.WhisperClientService;
 import org.vaslim.whisper_asr.client.api.EndpointsApi;
 
 import java.io.File;
-import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +30,8 @@ public class WhisperClientServiceImpl implements WhisperClientService {
 
     @Value("${output.format}")
     private String outputFormat;
+
+    private static final Logger logger = LoggerFactory.getLogger(WhisperClientServiceImpl.class);
 
     private final FileService fileService;
 
@@ -50,11 +54,11 @@ public class WhisperClientServiceImpl implements WhisperClientService {
     @Override
     public void processAllFiles() {
         List<Item> unprocessedItems = itemRepository.findAllByFilePathTextIsNull();
+        //logger.info("STARTED processing loop, unprocessedItems size: " + unprocessedItems.size());
         unprocessedItems.forEach(item -> {
             String videoPath = item.getFilePathVideo();
             File videoFile = new File(videoPath);
             updateItemStatus(videoFile, ProcessingStatus.IN_PROGRESS);
-            System.out.println("STARTED processing");
             final EndpointsApi[] endpointsApi = new EndpointsApi[1];
             while (endpointsApi[0] == null){
                 endpointsApi[0] = connectionPool.getConnection();
@@ -62,64 +66,60 @@ public class WhisperClientServiceImpl implements WhisperClientService {
             }
             new Thread(() -> {
                 try {
-                    System.out.println("currently: " + videoFile.getAbsolutePath() + " on "+ endpointsApi[0].getApiClient());
                     String outputFileNamePath = videoFile.getAbsolutePath().substring(0,videoFile.getAbsolutePath().lastIndexOf(".")) + "." + outputFormat;
                     File audioFile = fileService.extractAudio(videoFile);
                     long startTime = System.currentTimeMillis();
                     long endTime;
                     try {
+                        if(itemRepository.findById(item.getId()).get().getFilePathText() != null) throw new BatchSttException("Item " + item.getFilePathVideo() + " already processed");
+
                         fileService.processFile(audioFile, outputFileNamePath, endpointsApi[0]);
                         endTime = System.currentTimeMillis();
                         if (new File(outputFileNamePath).exists()){
-                            fileService.saveAsProcessed(videoPath , outputFileNamePath);
+                            fileService.saveAsProcessed(outputFileNamePath);
                             statisticsService.incrementProcessedItemsPerInstance(endpointsApi[0].getApiClient().getBasePath());
                             statisticsService.incrementTotalProcessingTimePerInstance(endpointsApi[0].getApiClient().getBasePath(),endTime - startTime);
                         }
                         connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        logger.warn("Inference failed with exception: " + e.getMessage() + " for " + videoPath);
                         updateItemStatus(videoFile, ProcessingStatus.PENDING);
-                        disableInferenceInstanceOnFailure(endpointsApi);
+                        updateInferenceInstanceOnFailure(endpointsApi);
+                        connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
 
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    logger.warn("Inference failed with exception: " + e.getMessage() + " for " + videoPath);
                     updateItemStatus(videoFile, ProcessingStatus.PENDING);
-                    disableInferenceInstanceOnFailure(endpointsApi);
+                    updateInferenceInstanceOnFailure(endpointsApi);
+                    connectionPool.addConnection(endpointsApi[0].getApiClient().getBasePath());
                 }
             }).start();
 
         });
     }
 
-    private void disableInferenceInstanceOnFailure(EndpointsApi[] endpointsApi) {
+    private void updateInferenceInstanceOnFailure(EndpointsApi[] endpointsApi) {
         InferenceInstance inferenceInstance = inferenceInstanceRepository.findByInstanceUrl(endpointsApi[0].getApiClient().getBasePath()).orElse(null);
         assert inferenceInstance != null;
-        inferenceInstance.setAvailable(false);
+        //inferenceInstance.setAvailable(false);
         inferenceInstance.setFailedRunsCount(inferenceInstance.getFailedRunsCount() + 1);
         inferenceInstanceRepository.save(inferenceInstance);
     }
 
     private void updateItemStatus(File videoFile, ProcessingStatus processingStatus) {
-        Optional<Item> item = itemRepository.findByFilePathVideoEquals(videoFile.getAbsolutePath());
-        if(item.isPresent()){
-            item.get().setProcessingStatus(processingStatus);
-            itemRepository.save(item.get());
+        try{
+            String fileVideoPathNoExtension = videoFile.getAbsolutePath().substring(0,videoFile.getAbsolutePath().lastIndexOf("."));
+            Optional<Item> item = itemRepository.findByFilePathVideoStartingWith(fileVideoPathNoExtension+".");
+            if(item.isPresent()){
+                item.get().setProcessingStatus(processingStatus);
+                itemRepository.saveAndFlush(item.get());
+            }
+        } catch (Exception e){
+            logger.error(e.getMessage() + " for file: " + videoFile.getAbsolutePath());
         }
     }
 
-    @Override
-    public void findUnprocessedFiles() {
-        File directory = new File(filesystemPath);
-        String[] directories = directory.list((current, name) -> new File(current, name).isDirectory());
-        if (directories != null) {
-            for (String dir : directories) {
-                System.out.println(directory+ "/"+ dir);
-                fileService.findUnprocessedFiles(Path.of(directory+ "/"+ dir));
-            }
-            fileService.findUnprocessedFiles(Path.of(directory.getAbsolutePath()));
-        }
-    }
 
     private void sleepMilis(Long milis){
         try {

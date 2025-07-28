@@ -1,23 +1,26 @@
 package org.vaslim.batch_stt.scheduledjob;
 
+import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
+import org.vaslim.batch_stt.service.FileService;
 import org.vaslim.batch_stt.service.WhisperClientService;
 
 import java.util.concurrent.locks.ReentrantLock;
 
-@Component
+@Configuration
 @EnableScheduling
 public class TranscribingScheduledTask {
     private final WhisperClientService whisperClientService;
 
+    private final FileService fileService;
     private final ReentrantLock fileRefreshTaskReentrantLock;
 
     private final ReentrantLock fileProcessingTaskReentrantLock;
 
-    public TranscribingScheduledTask(WhisperClientService whisperClientService, ReentrantLock fileRefreshTaskReentrantLock, ReentrantLock fileProcessingTaskReentrantLock) {
+    public TranscribingScheduledTask(WhisperClientService whisperClientService, FileService fileService, ReentrantLock fileRefreshTaskReentrantLock, ReentrantLock fileProcessingTaskReentrantLock) {
         this.whisperClientService = whisperClientService;
+        this.fileService = fileService;
         this.fileRefreshTaskReentrantLock = fileRefreshTaskReentrantLock;
         this.fileProcessingTaskReentrantLock = fileProcessingTaskReentrantLock;
     }
@@ -26,7 +29,7 @@ public class TranscribingScheduledTask {
     public void runRefreshFiles() {
         if(fileRefreshTaskReentrantLock.tryLock()){
             try {
-                whisperClientService.findUnprocessedFiles();
+                fileService.findUnprocessedFiles();
             } finally {
                 fileRefreshTaskReentrantLock.unlock();
             }

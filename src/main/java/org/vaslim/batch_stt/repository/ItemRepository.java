@@ -8,6 +8,7 @@ import org.vaslim.batch_stt.model.Item;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface ItemRepository extends JpaRepository<Item, Long> {
@@ -17,13 +18,16 @@ public interface ItemRepository extends JpaRepository<Item, Long> {
 
     boolean existsItemByFilePathVideoLike(String filePathVideo);
 
-    Optional<Item> findByFilePathVideoEquals(String filePathVideo);
+    Optional<Item> findByFilePathVideoStartingWith(String filePathVideoNoExtension);
 
     List<Item> findByTextFilterHashNotLikeOrTextFilterHashIsNull(String filterMapHash);
 
     Integer countItemByFilePathTextIsNull();
 
     Integer countItemByFilePathTextIsNotNull();
+
+    Integer countItemsByFilePathVideoEndingWith(String extension);
+    Set<Item> findItemsByFilePathVideoNotContaining(String extension);
 
     @Transactional
     void deleteItemByFilePathVideoStartingWith(String excludedPath);

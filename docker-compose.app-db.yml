@@ -1,0 +1,51 @@
+version: '3'
+services:
+  app-be:
+    image: 'localhost/vaslim/batchstt'
+    build:
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=${SPRING_PROFILES_ACTIVE}
+      - WHISPER_API_URLS=${WHISPER_API_URLS}
+      - OUTPUT_FORMAT=${OUTPUT_FORMAT}
+      - JOB_CRON=${JOB_CRON}
+      - DATASOURCE_URL=${DATASOURCE_URL}
+      - DATASOURCE_USERNAME=${DATASOURCE_USERNAME}
+      - DATASOURCE_PASSWORD=${DATASOURCE_PASSWORD}
+      - LIQUIBASE_SCHEMA=${LIQUIBASE_SCHEMA}
+      - EXCLUDED_PATHS=${EXCLUDED_PATHS}
+      - FRONTEND_ORIGIN_URL=${FRONTEND_ORIGIN_URL}
+      - SPRING_SECURITY_USERNAME=${SPRING_SECURITY_USERNAME}
+      - SPRING_SECURITY_PASSWORD=${SPRING_SECURITY_PASSWORD}
+      - MP3_SAVE=${MP3_SAVE}
+    volumes:
+      - ${VIDEOS_PATH}:/mnt/videos/folder1:rw
+      - ${FILTER_FILE_PATH}:/etc/filter.txt:r
+    restart: always
+    networks:
+      - batchstt_net
+
+  mariadb:
+    image: "bitnami/mariadb:latest"
+    restart: 'always'
+    volumes:
+      - mariadbvol:/var/lib/mysql
+    environment:
+      MARIADB_ROOT_PASSWORD: ${ADMIN_PASSWORD}
+      MARIADB_DATABASE: ${DATASOURCE_DATABASE}
+      MARIADB_USER: ${DATASOURCE_USERNAME}
+      MARIADB_PASSWORD: ${DATASOURCE_PASSWORD}
+    networks:
+      - batchstt_net
+
+  volumes:
+    mariadbvol:
+
+#sudo docker network create --opt com.docker.network.driver.mtu=1420 --driver bridge batchstt_net
+#docker network create batchstt_net
+networks:
+  batchstt_net:
+    external: true
+

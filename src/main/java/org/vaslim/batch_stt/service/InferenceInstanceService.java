@@ -18,4 +18,6 @@ public interface InferenceInstanceService {
     Set<InferenceInstanceDTO> getAll(String username);
 
     Boolean checkIsReachable(String basePath);
+
+    Boolean checkIsWhisperAvailable(String basePath);
 }

@@ -1,6 +1,8 @@
 package org.vaslim.batch_stt.service.impl;
 
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.vaslim.batch_stt.dto.InferenceInstanceDTO;
 import org.vaslim.batch_stt.exception.BatchSttException;
@@ -11,14 +13,14 @@ import org.vaslim.batch_stt.repository.InferenceInstanceRepository;
 import org.vaslim.batch_stt.service.InferenceInstanceService;
 
 import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.*;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 public class InferenceInstanceServiceImpl implements InferenceInstanceService {
 
+    private static final Logger logger = LoggerFactory.getLogger(InferenceInstanceServiceImpl.class);
     private final AppUserRepository appUserRepository;
 
     private final InferenceInstanceRepository inferenceInstanceRepository;
@@ -82,15 +84,59 @@ public class InferenceInstanceServiceImpl implements InferenceInstanceService {
 
     @Override
     public Boolean checkIsReachable(String basePath) {
+        final int timeout = 2000;
+        try {
+            boolean reachable = InetAddress.getByName(getHostFromUrl(basePath)).isReachable(timeout);
+            if(!reachable) throw new IOException("Address not reachable.");
+            try (Socket socket = new Socket()) {
+                socket.connect(new InetSocketAddress(getHostFromUrl(basePath), getPortFromUrl(basePath)), timeout);
+                return true;
+            } catch (IOException e) {
+                return false; // Either timeout or unreachable or failed DNS lookup.
+            }
+        } catch (IOException e) {
+            //logger.info("Instance " + basePath + " failed online check with exception: " + e.getMessage());
+            return false;
+        }
+    }
+
+    @Override
+    public Boolean checkIsWhisperAvailable(String basePath) {
         try {
             URL url = new URL(basePath+"/docs");
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("GET");
-            connection.setConnectTimeout(2000);
+            connection.setConnectTimeout(15000);
             int responseCode = connection.getResponseCode();
             return (responseCode == HttpURLConnection.HTTP_OK);
         } catch (IOException e) {
             return false;
         }
+    }
+
+    private int getPortFromUrl(String basePath) {
+        basePath = stripPrefix(basePath);
+
+        return Integer.parseInt(basePath.split(":")[1]);
+    }
+
+
+    private String getHostFromUrl(String basePath) {
+        basePath = stripPrefix(basePath);
+
+        return basePath.split(":")[0];
+    }
+
+    private String stripPrefix(String basePath) {
+        final String HTTP = "http://";
+        final String HTTPS = "https://";
+
+        if(basePath.startsWith(HTTP)){
+            basePath = basePath.replace(HTTP, "");
+        }
+        else if(basePath.startsWith(HTTPS)){
+            basePath = basePath.replace(HTTPS, "");
+        }
+        return basePath;
     }
 }

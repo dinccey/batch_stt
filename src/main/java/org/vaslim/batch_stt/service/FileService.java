@@ -5,9 +5,6 @@ import org.vaslim.whisper_asr.client.api.EndpointsApi;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.file.Path;
 
 @Service
 public interface FileService {
@@ -15,11 +12,11 @@ public interface FileService {
     //receive video/audio file as input, send it to whisper ai and return the resulting text file as OutputStream
     File processFile(File file, String outputFilePathName, EndpointsApi endpointsApi) throws IOException;
 
-    void findUnprocessedFiles(Path path);
+    void findUnprocessedFiles();
 
     File extractAudio(File videoFile) throws IOException;
 
-    void saveAsProcessed(String videoPath, String outputPath);
+    void saveAsProcessed(String path);
 
     void saveToProcess(String path);
 }
