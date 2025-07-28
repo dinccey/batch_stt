@@ -1,14 +1,14 @@
-FROM maven:3.9.4-amazoncorretto-17 AS builder
+FROM maven:3.9.6-amazoncorretto-17 AS builder
 WORKDIR /app
 COPY pom.xml .
 RUN mvn dependency:go-offline
 
 FROM builder as pkg
 COPY src ./src
-RUN mvn package -Dmaven.test.skip
+RUN mvn -o clean install -Dmaven.test.skip
 
 # Second stage: run the jar using Corretto
-FROM amazoncorretto:21-al2023-headful
+FROM amazoncorretto:24-al2023-headful
 COPY --from=pkg /app/target/*.jar app.jar
 RUN mkdir /mnt/ftp
 EXPOSE 8080
