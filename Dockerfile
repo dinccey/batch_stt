@@ -10,6 +10,6 @@ RUN mvn package -Dmaven.test.skip
 # Second stage: run the jar using Corretto
 FROM amazoncorretto:24-al2023-headful
 COPY --from=pkg /app/target/*.jar app.jar
-RUN mkdir /mnt/ftp
+RUN mkdir /mnt/ftp && mkdir /mnt/videos
 EXPOSE 8080
 ENTRYPOINT ["java","-jar","/app.jar"]
