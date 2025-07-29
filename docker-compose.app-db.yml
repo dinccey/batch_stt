@@ -29,6 +29,8 @@ services:
 
   mariadb:
     image: "bitnami/mariadb:latest"
+    ports:
+      - "3306:3306"
     restart: 'always'
     volumes:
       - mariadbvol:/var/lib/mysql
