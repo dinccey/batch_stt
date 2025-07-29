@@ -5,7 +5,7 @@ RUN mvn dependency:go-offline
 
 FROM builder as pkg
 COPY src ./src
-RUN mvn -o clean install -Dmaven.test.skip
+RUN mvn package -Dmaven.test.skip
 
 # Second stage: run the jar using Corretto
 FROM amazoncorretto:24-al2023-headful
