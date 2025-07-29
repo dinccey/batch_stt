@@ -1,8 +1,5 @@
 package org.vaslim.batch_stt.service.impl;
 
-import org.bytedeco.ffmpeg.global.avcodec;
-import org.bytedeco.javacv.FFmpegFrameGrabber;
-import org.bytedeco.javacv.FFmpegFrameRecorder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,9 +33,6 @@ public class FileServiceImpl implements FileService {
 
     @Value("${output.format}")
     private String outputFormat;
-
-    @Value("${mp3.save}")
-    private boolean saveAudio;
 
     @Value("${excluded.paths}")
     private String[] excludedPaths;
@@ -143,39 +137,15 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public File extractAudio(File videoFile) throws IOException {
-        String audioFileName = "tmp.mp3";
-        if(saveAudio){
-            audioFileName = videoFile.getAbsolutePath().substring(0, videoFile.getAbsolutePath().lastIndexOf(".")) + ".mp3";
-        }
+    public File extractAudio(File videoFile) {
+        String audioFileName = videoFile.getAbsolutePath().substring(0, videoFile.getAbsolutePath().lastIndexOf(".")) + ".mp3";
         File audioFile = new File(audioFileName);
+
         if(audioFile.exists()){
             return audioFile;
         }
-        try (FFmpegFrameGrabber grabber = new FFmpegFrameGrabber(videoFile)) {
-            grabber.setOption("-vn","");
-            grabber.start();
-            try (FFmpegFrameRecorder recorder = new FFmpegFrameRecorder(audioFile, 1)) {
-                recorder.setAudioCodec(avcodec.AV_CODEC_ID_MP3);
-                recorder.setAudioQuality(0);
-                recorder.setAudioBitrate(128000);
-                recorder.setSampleRate(grabber.getSampleRate());
-                recorder.setImageWidth(0);
-                recorder.setImageHeight(0);
-                recorder.start();
-                while (true) {
-                    try {
-                        recorder.record(grabber.grabSamples());
-                    } catch (org.bytedeco.javacv.FrameGrabber.Exception e) {
-                        break;
-                    }
-                }
-            } catch (FFmpegFrameRecorder.Exception e){
-                System.out.println(e.getMessage());
-            }
-        }
-        System.out.println("Audio extracted successfully!");
-        return audioFile;
+
+        return null;
     }
 
     public void deleteExcludedItemsFromDb(String[] excludedPaths){
