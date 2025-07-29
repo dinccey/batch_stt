@@ -29,6 +29,7 @@ public class FileScanServiceImpl implements FileScanService {
     public FileScanServiceImpl(@Value("${filesystem.path}") String path) {
         // list of files in the path
         File rootDirectory = new File(path);
+        logger.info("File scan directory: {}", rootDirectory.getAbsolutePath());
         addIterators(iterators, rootDirectory);
     }
 
